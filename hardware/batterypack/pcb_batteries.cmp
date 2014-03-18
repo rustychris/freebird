@@ -1,0 +1,52 @@
+Cmp-Mod V01 Created by CvPcb (2012-apr-16-27)-stable date = Mon 03 Mar 2014 04:38:32 PM EST
+
+BeginCmp
+TimeStamp = /5314DA18;
+Reference = BT1;
+ValeurCmp = BATTERY;
+IdModule  = bh123a;
+EndCmp
+
+BeginCmp
+TimeStamp = /5314DA24;
+Reference = BT2;
+ValeurCmp = BATTERY;
+IdModule  = bh123a;
+EndCmp
+
+BeginCmp
+TimeStamp = /5314DA2B;
+Reference = BT3;
+ValeurCmp = BATTERY;
+IdModule  = bh123a;
+EndCmp
+
+BeginCmp
+TimeStamp = /5314DA2E;
+Reference = BT4;
+ValeurCmp = BATTERY;
+IdModule  = bh123a;
+EndCmp
+
+BeginCmp
+TimeStamp = /5314DA30;
+Reference = BT5;
+ValeurCmp = BATTERY;
+IdModule  = bh123a;
+EndCmp
+
+BeginCmp
+TimeStamp = /5314DA35;
+Reference = BT6;
+ValeurCmp = BATTERY;
+IdModule  = bh123a;
+EndCmp
+
+BeginCmp
+TimeStamp = /5314D95B;
+Reference = P1;
+ValeurCmp = CONN_2;
+IdModule  = PIN_ARRAY_2X1;
+EndCmp
+
+EndListe

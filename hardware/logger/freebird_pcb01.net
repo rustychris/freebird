@@ -1,0 +1,207 @@
+# EESchema Netlist Version 1.1 created  Tue 04 Mar 2014 06:18:38 PM EST
+(
+ ( /531657C1 C1V7 C1 10uF
+  ( 1 /5V )
+  ( 2 GND )
+ )
+ ( /531657D6 CP4 C2 0.01uF
+  ( 1 /5V )
+  ( 2 GND )
+ )
+ ( /530E394E SFunSDbreakout J1 SD
+  ( 1 ? )
+  ( 2 N-000042 )
+  ( 3 /MOSI )
+  ( 4 ? )
+  ( 5 /SCK )
+  ( 6 /3.3V )
+  ( 7 GND )
+  ( 8 /MISO )
+  ( 9 ? )
+  ( 10 ? )
+ )
+ ( /530E3FCC pj102A P1 CONN_2
+  ( 1 GND )
+  ( 2 N-000040 )
+ )
+ ( /530E4066 SIL-1 P2 CONN_1
+  ( 1 /AGND )
+ )
+ ( /530E406E SIL-1 P3 CONN_1
+  ( 1 N-000041 )
+ )
+ ( /53149536 pin_array_12x2 P4 CONN_12X2
+  ( 1 /5V )
+  ( 2 /5V )
+  ( 3 /3.3V )
+  ( 4 /3.3V )
+  ( 5 GND )
+  ( 6 GND )
+  ( 7 /MOSI )
+  ( 8 /MOSI )
+  ( 9 /MISO )
+  ( 10 /MISO )
+  ( 11 /SCK )
+  ( 12 /SCK )
+  ( 13 /SCL0 )
+  ( 14 /SCL0 )
+  ( 15 /SDA0 )
+  ( 16 /SDA0 )
+  ( 17 /RX3 )
+  ( 18 /RX3 )
+  ( 19 /TX3 )
+  ( 20 /TX3 )
+  ( 21 /A8 )
+  ( 22 /A8 )
+  ( 23 /A9 )
+  ( 24 /A9 )
+ )
+ ( /5314951B pin_array_12x2 P5 CONN_12X2
+  ( 1 /5V )
+  ( 2 /5V )
+  ( 3 /3.3V )
+  ( 4 /3.3V )
+  ( 5 GND )
+  ( 6 GND )
+  ( 7 /MOSI )
+  ( 8 /MOSI )
+  ( 9 /MISO )
+  ( 10 /MISO )
+  ( 11 /SCK )
+  ( 12 /SCK )
+  ( 13 /SCL0 )
+  ( 14 /SCL0 )
+  ( 15 /SDA0 )
+  ( 16 /SDA0 )
+  ( 17 /RX3 )
+  ( 18 /RX3 )
+  ( 19 /TX3 )
+  ( 20 /TX3 )
+  ( 21 /A8 )
+  ( 22 /A8 )
+  ( 23 /A9 )
+  ( 24 /A9 )
+ )
+ ( /530E371A R4 R1 10k
+  ( 1 /3.3V )
+  ( 2 /SCL0 )
+ )
+ ( /530E372D R4 R2 10k
+  ( 1 /3.3V )
+  ( 2 /SDA0 )
+ )
+ ( /531652E6 R4 R3 17k
+  ( 1 N-000043 )
+  ( 2 N-000044 )
+ )
+ ( /531652EC R4 R4 33k
+  ( 1 N-000044 )
+  ( 2 GND )
+ )
+ ( /53165971 R-78E U1 R-78E5
+  ( 1 N-000040 )
+  ( 2 GND )
+  ( 3 /5V )
+ )
+ ( /530E366A teensy31 U2 TEENSY3.1
+  ( 1 GND )
+  ( 2 ? )
+  ( 3 ? )
+  ( 4 ? )
+  ( 5 ? )
+  ( 6 ? )
+  ( 7 ? )
+  ( 8 ? )
+  ( 9 /RX3 )
+  ( 10 /TX3 )
+  ( 11 ? )
+  ( 12 N-000042 )
+  ( 13 /MOSI )
+  ( 14 /MISO )
+  ( 15 ? )
+  ( 16 ? )
+  ( 17 ? )
+  ( 18 ? )
+  ( 19 ? )
+  ( 20 /SCK )
+  ( 21 /A0 )
+  ( 22 ? )
+  ( 23 ? )
+  ( 24 ? )
+  ( 25 /SDA0 )
+  ( 26 /SCL0 )
+  ( 27 ? )
+  ( 28 ? )
+  ( 29 /A8 )
+  ( 30 /A9 )
+  ( 31 /3.3V )
+  ( 32 /AGND )
+  ( 33 /5V )
+ )
+ ( /530E3C82 ChronoDot U3 CHRDOT
+  ( 1 ? )
+  ( 2 ? )
+  ( 3 ? )
+  ( 4 ? )
+  ( 5 /SDA0 )
+  ( 6 /SCL0 )
+  ( 7 /3.3V )
+  ( 8 GND )
+ )
+ ( /53164F13 DIP-8__300 U4 OPA2350
+  ( 1 N-000043 )
+  ( 2 N-000043 )
+  ( 3 N-000041 )
+  ( 4 GND )
+  ( 5 N-000044 )
+  ( 6 /A0 )
+  ( 7 /A0 )
+  ( 8 /5V )
+ )
+)
+*
+{ Allowed footprints by component:
+$component C1
+ SM*
+ C?
+ C1-1
+$endlist
+$component C2
+ SM*
+ C?
+ C1-1
+$endlist
+$component J1
+ MICRO_SD*
+ SD*
+$endlist
+$component R1
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R2
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R3
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R4
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$endfootprintlist
+}
