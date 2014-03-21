@@ -1,17 +1,52 @@
-Cmp-Mod V01 Created by CvPcb (2012-apr-16-27)-stable date = Tue 04 Mar 2014 06:18:38 PM EST
+Cmp-Mod V01 Created by CvPcb (2012-apr-16-27)-stable date = Thu 20 Mar 2014 04:51:41 PM EDT
 
 BeginCmp
-TimeStamp = /531657C1;
+TimeStamp = /532B5101;
+Reference = 1M1;
+ValeurCmp = R;
+IdModule  = R4;
+EndCmp
+
+BeginCmp
+TimeStamp = /5329F2D5;
 Reference = C1;
-ValeurCmp = 10uF;
+ValeurCmp = C;
 IdModule  = C1V7;
 EndCmp
 
 BeginCmp
-TimeStamp = /531657D6;
+TimeStamp = /5329F32A;
 Reference = C2;
 ValeurCmp = 0.01uF;
 IdModule  = CP4;
+EndCmp
+
+BeginCmp
+TimeStamp = /5329F0E7;
+Reference = D1;
+ValeurCmp = DIODE;
+IdModule  = D3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5329F0FF;
+Reference = D2;
+ValeurCmp = DIODE;
+IdModule  = D3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5329F0F6;
+Reference = D3;
+ValeurCmp = DIODE;
+IdModule  = D3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5329F105;
+Reference = D4;
+ValeurCmp = DIODE;
+IdModule  = D3;
 EndCmp
 
 BeginCmp
@@ -29,17 +64,10 @@ IdModule  = pj102A;
 EndCmp
 
 BeginCmp
-TimeStamp = /530E4066;
+TimeStamp = /53178BBF;
 Reference = P2;
-ValeurCmp = CONN_1;
-IdModule  = SIL-1;
-EndCmp
-
-BeginCmp
-TimeStamp = /530E406E;
-Reference = P3;
-ValeurCmp = CONN_1;
-IdModule  = SIL-1;
+ValeurCmp = CONN_4_SQUID;
+IdModule  = SIL-4;
 EndCmp
 
 BeginCmp
@@ -57,31 +85,38 @@ IdModule  = pin_array_12x2;
 EndCmp
 
 BeginCmp
-TimeStamp = /530E371A;
+TimeStamp = /5329F28E;
 Reference = R1;
-ValeurCmp = 10k;
+ValeurCmp = 100;
 IdModule  = R4;
 EndCmp
 
 BeginCmp
-TimeStamp = /530E372D;
+TimeStamp = /5329F097;
 Reference = R2;
+ValeurCmp = 100;
+IdModule  = R4;
+EndCmp
+
+BeginCmp
+TimeStamp = /5329F0A2;
+Reference = R3;
+ValeurCmp = 100;
+IdModule  = R4;
+EndCmp
+
+BeginCmp
+TimeStamp = /5318AA09;
+Reference = R4;
 ValeurCmp = 10k;
 IdModule  = R4;
 EndCmp
 
 BeginCmp
-TimeStamp = /531652E6;
-Reference = R3;
-ValeurCmp = 17k;
-IdModule  = R4;
-EndCmp
-
-BeginCmp
-TimeStamp = /531652EC;
-Reference = R4;
-ValeurCmp = 33k;
-IdModule  = R4;
+TimeStamp = /532B507F;
+Reference = SP1;
+ValeurCmp = PIEZO;
+IdModule  = PT1240PQ;
 EndCmp
 
 BeginCmp
@@ -106,10 +141,10 @@ IdModule  = ChronoDot;
 EndCmp
 
 BeginCmp
-TimeStamp = /53164F13;
+TimeStamp = /5329D47D;
 Reference = U4;
-ValeurCmp = OPA2350;
-IdModule  = DIP-8__300;
+ValeurCmp = ADAFRUITADS1115;
+IdModule  = AdafruitADS1115;
 EndCmp
 
 EndListe

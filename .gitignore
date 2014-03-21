@@ -1,0 +1,4 @@
+*.bak
+*.dsn
+*.ses
+*-cache.lib
