@@ -6,18 +6,37 @@ all: $(BASE).zip
 $(BASE).txt: $(BASE).drl
 	cp $< $@
 
-$(BASE)-PCB_Edges.gml: $(BASE)-PCB_Edges.gbr
+$(BASE).gml: $(BASE)-PCB_Edges.gbr
 	cp $< $@
 
 
-SRCS=$(BASE)-PCB_Edges.gml $(BASE)-Front.gtl $(BASE)-Back.gbl $(BASE)-Mask_Front.gts $(BASE)-Mask_Back.gbs \
- $(BASE)-SilkS_Front.gto $(BASE)-SilkS_Back.gbo $(BASE).txt
+$(BASE).gtl: $(BASE)-Front.gtl
+	cp $< $@
+
+$(BASE).gbl: $(BASE)-Back.gbl
+	cp $< $@
+
+$(BASE).gts: $(BASE)-Mask_Front.gts
+	cp $< $@
+
+$(BASE).gbs: $(BASE)-Mask_Back.gbs
+	cp $< $@
+
+$(BASE).gto: $(BASE)-SilkS_Front.gto 
+	cp $< $@
+
+$(BASE).gbo: $(BASE)-SilkS_Back.gbo
+	cp $< $@
+
+
+SRCS=$(BASE).gml $(BASE).gtl $(BASE).gbl $(BASE).gts $(BASE).gbs \
+ $(BASE).gto $(BASE).gbo $(BASE).txt
 
 
 $(BASE).zip: $(SRCS)
-	zip ${BASE}.zip $(SRCS)
+	zip $(BASE).zip $(SRCS)
 
 .PHONY: gerbv
 
-gerbv:
+gerbv: $(SRCS)
 	gerbv $(SRCS)
