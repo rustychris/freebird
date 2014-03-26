@@ -1,4 +1,4 @@
-PCBNEW-BOARD Version 1 date Wed 26 Mar 2014 03:42:26 PM EDT
+PCBNEW-BOARD Version 1 date Wed 26 Mar 2014 03:50:22 PM EDT
 
 # Created by Pcbnew(2012-apr-16-27)-stable
 
@@ -4550,8 +4550,8 @@ S3 0 38976 55512 39419 55742 120
 S4 0 38976 55512 39419 55282 120
 $endCOTATION
 $TEXTPCB
-Te "commit 6a689b5"
-nl "2014-03-21"
+Te "tag logger_V01"
+nl "2014-03-26"
 Po 45200 34700 600 800 120 0
 De 20 0 0 Normal C
 $EndTEXTPCB
