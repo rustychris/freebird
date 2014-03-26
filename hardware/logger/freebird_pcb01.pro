@@ -1,8 +1,6 @@
-update=Thu 20 Mar 2014 06:19:22 PM EDT
+update=Tue 25 Mar 2014 05:54:02 PM EDT
 version=1
-last_client=pcbnew
-[general]
-version=1
+last_client=kicad
 [cvpcb]
 version=1
 NetIExt=net
@@ -108,3 +106,5 @@ LibName11=valves
 LibName12=/home/rusty/research/freebird/pcb01/libraries/barrelJack
 LibName13=mymodules
 LibName14=logo-rev
+[general]
+version=1
