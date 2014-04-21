@@ -34,6 +34,7 @@ SRCS=$(BASE).gml $(BASE).gtl $(BASE).gbl $(BASE).gts $(BASE).gbs \
 
 
 $(BASE).zip: $(SRCS)
+	-rm $(BASE).zip
 	zip $(BASE).zip $(SRCS)
 
 .PHONY: gerbv
