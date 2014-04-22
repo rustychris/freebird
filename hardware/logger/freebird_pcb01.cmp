@@ -1,16 +1,16 @@
-Cmp-Mod V01 Created by CvPcb (2012-apr-16-27)-stable date = Tue 25 Mar 2014 05:09:55 PM EDT
+Cmp-Mod V01 Created by CvPcb (2012-apr-16-27)-stable date = Tue 22 Apr 2014 04:40:09 PM EDT
 
 BeginCmp
-TimeStamp = /532B5101;
-Reference = 1M1;
-ValeurCmp = R;
-IdModule  = R4;
+TimeStamp = /5356990E;
+Reference = BT1;
+ValeurCmp = CR1632;
+IdModule  = BH600SMG;
 EndCmp
 
 BeginCmp
-TimeStamp = /5329F2D5;
+TimeStamp = /535586DC;
 Reference = C1;
-ValeurCmp = C;
+ValeurCmp = 1uF;
 IdModule  = C1V7;
 EndCmp
 
@@ -18,7 +18,21 @@ BeginCmp
 TimeStamp = /5329F32A;
 Reference = C2;
 ValeurCmp = 0.01uF;
+IdModule  = C2;
+EndCmp
+
+BeginCmp
+TimeStamp = /53558770;
+Reference = C3;
+ValeurCmp = 100uF;
 IdModule  = C1V7;
+EndCmp
+
+BeginCmp
+TimeStamp = /53569D24;
+Reference = C4;
+ValeurCmp = 0.1uF;
+IdModule  = C1;
 EndCmp
 
 BeginCmp
@@ -50,10 +64,10 @@ IdModule  = D3;
 EndCmp
 
 BeginCmp
-TimeStamp = /530E394E;
+TimeStamp = /535675D5;
 Reference = J1;
-ValeurCmp = SD;
-IdModule  = SFunSDbreakout;
+ValeurCmp = SDSOCKETDM1;
+IdModule  = DM1AASF;
 EndCmp
 
 BeginCmp
@@ -85,31 +99,45 @@ IdModule  = pin_array_12x2;
 EndCmp
 
 BeginCmp
-TimeStamp = /5329F28E;
+TimeStamp = /53566B6A;
 Reference = R1;
-ValeurCmp = 100;
-IdModule  = R4;
+ValeurCmp = 1M;
+IdModule  = R3;
 EndCmp
 
 BeginCmp
 TimeStamp = /5329F097;
 Reference = R2;
 ValeurCmp = 100;
-IdModule  = R4;
+IdModule  = R3;
 EndCmp
 
 BeginCmp
 TimeStamp = /5329F0A2;
 Reference = R3;
 ValeurCmp = 100;
-IdModule  = R4;
+IdModule  = R3;
 EndCmp
 
 BeginCmp
 TimeStamp = /5318AA09;
 Reference = R4;
 ValeurCmp = 10k;
-IdModule  = R4;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /53568242;
+Reference = R5;
+ValeurCmp = 10k;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5356823D;
+Reference = R6;
+ValeurCmp = 10k;
+IdModule  = R3;
 EndCmp
 
 BeginCmp
@@ -134,10 +162,10 @@ IdModule  = teensy31;
 EndCmp
 
 BeginCmp
-TimeStamp = /530E3C82;
+TimeStamp = /53567DF6;
 Reference = U3;
-ValeurCmp = CHRDOT;
-IdModule  = ChronoDot;
+ValeurCmp = DS3231;
+IdModule  = SO16W;
 EndCmp
 
 BeginCmp
@@ -145,6 +173,13 @@ TimeStamp = /5329D47D;
 Reference = U4;
 ValeurCmp = ADAFRUITADS1115;
 IdModule  = AdafruitADS1115;
+EndCmp
+
+BeginCmp
+TimeStamp = /53558667;
+Reference = U5;
+ValeurCmp = MCP1700-3302;
+IdModule  = LM79LXX;
 EndCmp
 
 EndListe

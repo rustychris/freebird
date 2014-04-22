@@ -1,9 +1,24 @@
-EESchema-DOCLIB  Version 2.0  Date: Tue 04 Mar 2014 05:07:54 PM EST
+EESchema-DOCLIB  Version 2.0  Date: Tue 22 Apr 2014 03:21:01 PM EDT
+#
+$CMP ADAFRUITADS1115
+D Adafruit ADS1115 breakout
+K ADC ADS1115
+$ENDCMP
+#
+$CMP MCP1700-3302
+D Linear Regulator +5V
+K POWER REGUL
+$ENDCMP
 #
 $CMP OPA2350
 D Dual Op amp (low power)
 K ampliop
 F ns/lm158.pdf
+$ENDCMP
+#
+$CMP SDSOCKETDM1
+D SD card slot, DM1AA-SF-PEJ
+K SD
 $ENDCMP
 #
 #End Doc Library
