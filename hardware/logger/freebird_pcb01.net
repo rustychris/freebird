@@ -1,34 +1,68 @@
-# EESchema Netlist Version 1.1 created  Tue 04 Mar 2014 06:18:38 PM EST
+# EESchema Netlist Version 1.1 created  Tue 22 Apr 2014 04:40:09 PM EDT
 (
- ( /531657C1 C1V7 C1 10uF
+ ( /5356990E BH600SMG BT1 CR1632
+  ( 1 N-000045 )
+  ( 2 GND )
+ )
+ ( /535586DC C1V7 C1 1uF
   ( 1 /5V )
   ( 2 GND )
  )
- ( /531657D6 CP4 C2 0.01uF
-  ( 1 /5V )
+ ( /5329F32A C2 C2 0.01uF
+  ( 1 N-000047 )
+  ( 2 /AGND )
+ )
+ ( /53558770 C1V7 C3 100uF
+  ( 1 /3.3V )
   ( 2 GND )
  )
- ( /530E394E SFunSDbreakout J1 SD
-  ( 1 ? )
-  ( 2 N-000042 )
-  ( 3 /MOSI )
-  ( 4 ? )
+ ( /53569D24 C1 C4 0.1uF
+  ( 1 /3.3V )
+  ( 2 GND )
+ )
+ ( /5329F0E7 D3 D1 DIODE
+  ( 1 N-000041 )
+  ( 2 /5V )
+ )
+ ( /5329F0FF D3 D2 DIODE
+  ( 1 GND )
+  ( 2 N-000041 )
+ )
+ ( /5329F0F6 D3 D3 DIODE
+  ( 1 N-000048 )
+  ( 2 /5V )
+ )
+ ( /5329F105 D3 D4 DIODE
+  ( 1 GND )
+  ( 2 N-000048 )
+ )
+ ( /535675D5 DM1AASF J1 SDSOCKETDM1
+  ( 1 N-000042 )
+  ( 2 /MOSI )
+  ( 3 GND )
+  ( 4 /3.3V )
   ( 5 /SCK )
-  ( 6 /3.3V )
-  ( 7 GND )
-  ( 8 /MISO )
+  ( 6 GND )
+  ( 7 /MISO )
+  ( 8 ? )
   ( 9 ? )
   ( 10 ? )
+  ( 11 ? )
+  ( 12 ? )
+  ( 13 GND )
+  ( 14 GND )
+  ( 15 GND )
+  ( 16 GND )
  )
  ( /530E3FCC pj102A P1 CONN_2
   ( 1 GND )
   ( 2 N-000040 )
  )
- ( /530E4066 SIL-1 P2 CONN_1
-  ( 1 /AGND )
- )
- ( /530E406E SIL-1 P3 CONN_1
-  ( 1 N-000041 )
+ ( /53178BBF SIL-4 P2 CONN_4_SQUID
+  ( 1 N-000040 )
+  ( 2 GND )
+  ( 3 N-000041 )
+  ( 4 N-000048 )
  )
  ( /53149536 pin_array_12x2 P4 CONN_12X2
   ( 1 /5V )
@@ -82,20 +116,32 @@
   ( 23 /A9 )
   ( 24 /A9 )
  )
- ( /530E371A R4 R1 10k
-  ( 1 /3.3V )
-  ( 2 /SCL0 )
+ ( /53566B6A R3 R1 1M
+  ( 1 GND )
+  ( 2 N-000005 )
  )
- ( /530E372D R4 R2 10k
+ ( /5329F097 R3 R2 100
+  ( 1 N-000041 )
+  ( 2 N-000047 )
+ )
+ ( /5329F0A2 R3 R3 100
+  ( 1 N-000048 )
+  ( 2 /AGND )
+ )
+ ( /5318AA09 R3 R4 10k
+  ( 1 N-000046 )
+  ( 2 /3.3V )
+ )
+ ( /53568242 R3 R5 10k
   ( 1 /3.3V )
   ( 2 /SDA0 )
  )
- ( /531652E6 R4 R3 17k
-  ( 1 N-000043 )
-  ( 2 N-000044 )
+ ( /5356823D R3 R6 10k
+  ( 1 /3.3V )
+  ( 2 /SCL0 )
  )
- ( /531652EC R4 R4 33k
-  ( 1 N-000044 )
+ ( /532B507F PT1240PQ SP1 PIEZO
+  ( 1 N-000005 )
   ( 2 GND )
  )
  ( /53165971 R-78E U1 R-78E5
@@ -107,8 +153,8 @@
   ( 1 GND )
   ( 2 ? )
   ( 3 ? )
-  ( 4 ? )
-  ( 5 ? )
+  ( 4 N-000046 )
+  ( 5 N-000005 )
   ( 6 ? )
   ( 7 ? )
   ( 8 ? )
@@ -124,7 +170,7 @@
   ( 18 ? )
   ( 19 ? )
   ( 20 /SCK )
-  ( 21 /A0 )
+  ( 21 ? )
   ( 22 ? )
   ( 23 ? )
   ( 24 ? )
@@ -134,42 +180,80 @@
   ( 28 ? )
   ( 29 /A8 )
   ( 30 /A9 )
-  ( 31 /3.3V )
+  ( 31 ? )
   ( 32 /AGND )
   ( 33 /5V )
  )
- ( /530E3C82 ChronoDot U3 CHRDOT
+ ( /53567DF6 SO16W U3 DS3231
   ( 1 ? )
-  ( 2 ? )
-  ( 3 ? )
+  ( 2 /3.3V )
+  ( 3 N-000046 )
   ( 4 ? )
-  ( 5 /SDA0 )
-  ( 6 /SCL0 )
-  ( 7 /3.3V )
+  ( 5 GND )
+  ( 6 GND )
+  ( 7 GND )
   ( 8 GND )
+  ( 9 GND )
+  ( 10 GND )
+  ( 11 GND )
+  ( 12 GND )
+  ( 13 GND )
+  ( 14 N-000045 )
+  ( 15 /SDA0 )
+  ( 16 /SCL0 )
  )
- ( /53164F13 DIP-8__300 U4 OPA2350
-  ( 1 N-000043 )
-  ( 2 N-000043 )
-  ( 3 N-000041 )
-  ( 4 GND )
-  ( 5 N-000044 )
-  ( 6 /A0 )
-  ( 7 /A0 )
-  ( 8 /5V )
+ ( /5329D47D AdafruitADS1115 U4 ADAFRUITADS1115
+  ( 1 /5V )
+  ( 2 /AGND )
+  ( 3 /SCL0 )
+  ( 4 /SDA0 )
+  ( 5 /AGND )
+  ( 6 ? )
+  ( 7 N-000047 )
+  ( 8 /AGND )
+  ( 9 ? )
+  ( 10 ? )
+ )
+ ( /53558667 LM79LXX U5 MCP1700-3302
+  ( GND GND )
+  ( VI /5V )
+  ( VO /3.3V )
  )
 )
 *
 { Allowed footprints by component:
 $component C1
+ CP*
  SM*
- C?
- C1-1
 $endlist
 $component C2
  SM*
  C?
  C1-1
+$endlist
+$component C3
+ CP*
+ SM*
+$endlist
+$component C4
+ CP*
+ SM*
+$endlist
+$component D1
+ D?
+ S*
+$endlist
+$component D2
+ D?
+ S*
+$endlist
+$component D3
+ D?
+ S*
+$endlist
+$component D4
+ D?
+ S*
 $endlist
 $component J1
  MICRO_SD*
@@ -197,6 +281,20 @@ $component R3
  SM1206
 $endlist
 $component R4
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R5
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component R6
  R?
  SM0603
  SM0805

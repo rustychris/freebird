@@ -1,8 +1,11 @@
-update=Wed 26 Feb 2014 04:56:28 PM EST
+update=Tue 25 Mar 2014 05:54:02 PM EDT
 version=1
-last_client=pcbnew
-[general]
+last_client=kicad
+[cvpcb]
 version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms
 [eeschema]
 version=1
 LibDir=libraries
@@ -70,16 +73,11 @@ LibName32=myparts
 LibName33=DataStorage
 LibName34=ChrDot
 LibName35=DCjack
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
 [pcbnew]
 version=1
-PadDrlX=394
-PadDimH=591
-PadDimV=591
+PadDrlX=1329
+PadDimH=1600
+PadDimV=1600
 BoardThickness=630
 TxtPcbV=800
 TxtPcbH=600
@@ -107,3 +105,6 @@ LibName10=pga_sockets
 LibName11=valves
 LibName12=/home/rusty/research/freebird/pcb01/libraries/barrelJack
 LibName13=mymodules
+LibName14=logo-rev
+[general]
+version=1

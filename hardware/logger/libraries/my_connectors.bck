@@ -1,4 +1,4 @@
-EESchema-DOCLIB  Version 2.0  Date: Wed 26 Feb 2014 02:25:11 PM EST
+EESchema-DOCLIB  Version 2.0  Date: Wed 05 Mar 2014 03:39:41 PM EST
 #
 $CMP BUSAT
 D Connecteur BUS ISA 16 bits
@@ -133,6 +133,11 @@ $ENDCMP
 $CMP CONN_4
 D Symbole general de connecteur
 K CONN
+$ENDCMP
+#
+$CMP CONN_4_squid
+D 4-pin analog/power
+K CONN_SQUID
 $ENDCMP
 #
 $CMP CONN_4X2
