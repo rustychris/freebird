@@ -45,6 +45,9 @@ class FreebirdComm(object):
                 score+=5
             if port_info.find(self.TEENSY31_USBID)>=0:
                 score+=10
+            if port_path.find('HC-0')>=0:
+                # on Mac, the BT2S adapter shows up as HC-06-DevB
+                score+=7
             ports.append( [port_path,port_type,port_info,score] )
         ports.sort(key=lambda elt: -elt[3])
         return ports
@@ -55,6 +58,7 @@ class FreebirdComm(object):
           to try forever
         min_score: vague heuristic for choosing which serial ports are good candidates.
            for starters, 15 means the USB ID matches a teensy 3.1
+        return True if successful.
         """
         t_start=time.time()
         while 1:
@@ -69,7 +73,8 @@ class FreebirdComm(object):
             if timeout>=0 and time.time() > t_start+timeout:
                 break
             time.sleep(1.0)
-
+        return False
+    
     def disconnect(self):
         if self.serial is not None:
             self.serial.close()
@@ -96,7 +101,7 @@ class FreebirdComm(object):
         self.serial.flush()
 
         while 1:
-            line=fb.serial.readline()
+            line=self.serial.readline()
             if line.find(self.prompt)>=0:
                 return True
             if len(line)==0:
@@ -199,16 +204,17 @@ class FreebirdComm(object):
 
 ###
 
-fb=FreebirdComm()
-fb.connect(4)
-fb.enter_command_mode()
+if 0:
+    fb=FreebirdComm()
+    fb.connect(4)
+    fb.enter_command_mode()
 
 
-fb.sync_datetime_to_local_machine()
+    fb.sync_datetime_to_local_machine()
 
 
-fb_dt,my_dt=fb.query_datetimes()
-print my_dt-fb_dt
+    fb_dt,my_dt=fb.query_datetimes()
+    print my_dt-fb_dt
 
 
 
