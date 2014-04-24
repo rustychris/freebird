@@ -8,6 +8,6 @@ Basic design specs:
 * serial console for programming and diagnostics
 * SD card storage
 * accurate real time clock for timestamping data
-* power draw below 0.2 w
+* power draw <1.0w
 
 Details are evolving, see the [freebird wiki](https://github.com/rustychris/freebird/wiki).
