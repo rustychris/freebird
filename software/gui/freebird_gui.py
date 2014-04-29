@@ -112,10 +112,40 @@ class ConnectedDeviceHUD(wx.Panel):
         self.device_dt_display=wx.StaticText(self,label="---")
         self.grid.Add(self.device_dt_display,pos=(4,2),span=(1,5))
 
+
+        # Serial console:
+        self.serial_input=wx.TextCtrl(parent=self,size=(140,-1),style=wx.TE_PROCESS_ENTER)
+        self.grid.Add(self.serial_input,pos=(6,0),span=(1,5))
+        self.Bind(wx.EVT_TEXT_ENTER,self.handle_serial_input,self.serial_input)
+        self.listener=self.comm.add_listener()
+        self.Bind(wx.EVT_IDLE,self.poll_serial)
+        
+        self.sercon=wx.TextCtrl(parent=self,style=wx.TE_MULTILINE|wx.TE_READONLY,
+                                pos=(10,10),size=(300,300))
+        self.sercon.AppendText('Hello')
+        self.grid.Add(self.sercon,pos=(7,0),span=(4,10))
+        
         self.SetSizerAndFit(self.grid)
 
         self.set_state('disconnected')
 
+    # Would like to show serial interactions, while also allowing pre-packaged 
+    # interactions.  So any characters coming back from the comm should show
+    # up in the console here - but what is the right polling mechanism here?
+    # (a) the GUI polls the comm
+    # (b) the comm runs a thread which is always reading from the serial port.
+    # (c) what if the comm runs a reading thread, always logging from serial to
+    #     some number
+    def handle_serial_input(self,event):
+        txt=self.serial_input.GetValue()
+        print "Got text:",txt
+        if state=='connected':
+            self.comm.write(txt)
+    def poll_serial(self,event):
+        buff=self.listener.read(timeout=0)
+        if len(buff):
+            self.sercon.AppendText(buff)
+                
     def set_state(self,state):
         """ Update GUI controls to reflect a particular state
         """
