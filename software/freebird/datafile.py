@@ -35,10 +35,18 @@ class FreebirdFile0001(FreebirdFile):
         self.data_block_start=None
         self.Block=namedtuple('Block',['header','data','text'])
         self.serials={}
+        # for long running operations, the method can be run in a thread,
+        # and will attempt to update progress with a fractional estimate of
+        # it's progress.  
+        self.progress=0.0
+        self.data=None
         
     @property
     def nblocks(self):
         return os.stat(self.filename).st_size // self.block_Nbytes
+    @property
+    def nbytes(self):
+        return os.stat(self.filename).st_size 
 
     @contextmanager
     def opened(self):
@@ -171,8 +179,13 @@ class FreebirdFile0001(FreebirdFile):
         # np.datetime64 is less lossy, but dnums have better support in matplotlib
         # and readily convertible to matlab (offset of 366, not sure which way)
         self.timestamps=[]
+
         
         for blk_i in range(self.data_block_start,self.nblocks):
+            # 0.9, because the stitching together at the end takes some time
+            # but doesn't update progress
+            self.progress=0.9*float(blk_i)/self.nblocks
+            
             blk=self.open_read_block(blk_i)
             self.frames.append(blk.data)
 
@@ -185,7 +198,7 @@ class FreebirdFile0001(FreebirdFile):
             # argument to datetime64 must be an integer, no floating point.
             self.timestamps.append( np.datetime64(1000000*hdr['unixtime'] + microsecs,'us') )
             
-        self.data = np.concatenate(self.frames)
+        basic_data = np.concatenate(self.frames)
         
         expanded=[]
         dt_us=1000000/float(self.header_data['sample_rate_hz'])
@@ -198,14 +211,14 @@ class FreebirdFile0001(FreebirdFile):
         dnum0=date2num(self.timestamps[0].astype(datetime.datetime))
         full_pydnums+= dnum0-full_pydnums[0]
 
-        new_data=array_append.recarray_add_fields(self.data,
+        new_data=array_append.recarray_add_fields(basic_data,
                                                   [('timestamp',full_datetimes),
                                                    ('dn_py',full_pydnums),
                                                    ('dn_mat',full_pydnums+366)])
 
         new_data=self.add_derived_data(new_data)
-        self.date_and_time=new_data
-        return self.date_and_time
+        self.data=new_data
+        return self.data
 
     def postprocessors(self):
         derived.Calibration.load_directory(os.path.dirname(self.filename))

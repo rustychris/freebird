@@ -1,9 +1,16 @@
 import wx
+import threading
 import os
+from matplotlib.dates import num2date,date2num
+import datetime
+import numpy as np
 
 ID_CONNECT=wx.NewId()
 
-import freebird_api as api
+import device 
+import datafile
+
+import data_gui
 
 class FreebirdGui(wx.App):
     def __init__(self):
@@ -66,19 +73,19 @@ class MainFrame(wx.Frame):
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.BIN", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             # for now, assume a single file, but allow for lists of files
-            dc=DataCollection(self,"Data collection",
-                              paths=[os.path.join(dlg.GetDirectory(),dlg.GetFilename())])
+            dc=DatafileViewer(self,"Data file",
+                              filename=os.path.join(dlg.GetDirectory(),dlg.GetFilename()))
             dlg.Destroy()
 
 class ConnectedDeviceHUD(wx.Panel):
     """ A window holding widgets for info about a connected device.
-    roughly 1:1 correspondence with freebird_api.FreebirdComm, though
+    roughly 1:1 correspondence with device.FreebirdComm, though
     this doesn't get instantiated until a specific port has been selected.
     """
     def __init__(self,parent,port_path):
         super(ConnectedDeviceHUD,self).__init__(parent)
         self.port_path=port_path
-        self.comm=api.FreebirdComm()
+        self.comm=device.FreebirdComm()
         self.state='unknown'
 
         self.grid=wx.GridBagSizer(hgap=5,vgap=5)
@@ -198,7 +205,7 @@ class ConnectDialog(wx.SingleChoiceDialog):
     if successful, creates a ConnectedDeviceHUD
     """
     def __init__(self,parent):
-        self.fbcomm=api.FreebirdComm()
+        self.fbcomm=device.FreebirdComm()
         self.ports=self.fbcomm.available_serial_ports()
         port_names=[port[0] for port in self.ports]
         
@@ -208,14 +215,75 @@ class ConnectDialog(wx.SingleChoiceDialog):
         return self.ports[self.GetSelection()]
     
 
-class DataCollection(wx.Frame):
+class DatafileViewer(wx.Frame):
     """ Browse, convert, calibrate, etc. a set of output files
     stored locally.
     """
-    def __init__(self,parent,title,paths):
-        super(DataCollection,self).__init__(parent, title=title, size=(200,100))
+    def __init__(self,parent,title,filename):
+        super(DatafileViewer,self).__init__(parent, title=title, size=(300,400))
+        self.filename=filename
+        
+        self.fbfile=datafile.freebird_file_factory(self.filename)
+        
+        #HERE: when/where do we get this from the user?
+        self.fbfile.serials['squid']='SN104'
+        self.fbfile.serials['sbe7probe']='C175'
+        
+        self.grid=wx.GridBagSizer(hgap=5,vgap=5)
+        label=wx.StaticText(self, label="File: %s"%(self.filename))
+        self.grid.Add(label,pos=(0,0),span=(1,5))
+
+        # Various attributes:
+        self.grid.Add(wx.StaticText(self,label="Size [bytes]:"),pos=(1,0),span=(1,2))
+        self.grid.Add(wx.StaticText(self,label="{:,}".format(self.fbfile.nbytes)),pos=(1,2),span=(1,3))
+
+        self.grid.Add(wx.StaticText(self,label="Start:"),pos=(2,0),span=(1,2))
+        self.start_text=wx.StaticText(self,label="n/a")
+        self.grid.Add(self.start_text,pos=(2,2),span=(1,2))
+
+        self.grid.Add(wx.StaticText(self,label="End:"),pos=(3,0),span=(1,2))
+        self.end_text=wx.StaticText(self,label="n/a")
+        self.grid.Add(self.end_text,pos=(3,2),span=(1,2))
+
+        self.canvas=data_gui.CanvasPanel(self)
+        self.grid.Add(self.canvas,pos=(5,0),span=(5,5))
+
+        self.SetSizerAndFit(self.grid)
 
         self.Show(True)
+
+        self.parse()
+
+        self.canvas.show_data(self.fbfile)
+
+    def update_attributes(self):
+        if self.fbfile.data is None:
+            self.start_text.SetLabel('n/a')
+            self.end_text.SetLabel('n/a')
+        else:
+            self.start_text.SetLabel(num2date(self.data['dn_py'][0]).strftime("%Y-%m-%d %H:%M:%S"))
+            self.end_text.SetLabel(num2date(self.data['dn_py'][-1]).strftime("%Y-%m-%d %H:%M:%S"))
+    
+    def parse(self):
+        pd=wx.ProgressDialog("File load","Loading %s"%(os.path.basename(self.filename)),
+                             parent=self)
+        pd.Show(True)
+                             
+        def worker():
+            self.data=self.fbfile.read_all()
+        thr=threading.Thread(target=worker)
+        thr.start()
+
+        print "Starting parsing"
+        while thr.isAlive():
+            pd.Update(int(90*self.fbfile.progress))
+            thr.join(0.0)
+            wx.Yield()
+        print "Done parsing"
+        pd.Destroy()
+
+        # Update some info about the file
+        self.update_attributes()
 
 app=FreebirdGui()
 app.MainLoop()

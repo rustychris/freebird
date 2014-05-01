@@ -1,9 +1,9 @@
 import os
 
-import freebird_bin
-reload(freebird_bin)
+import datafile
+reload(datafile)
 
-fbin=freebird_bin.freebird_file_factory('../../../../testing/2014-04-30/DATA0004.BIN')
+fbin=datafile.freebird_file_factory('../../../../testing/2014-04-30/DATA0004.BIN')
 fbin.serials['squid']='SN104'
 fbin.serials['sbe7probe']='C175'
 
