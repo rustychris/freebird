@@ -1,0 +1,13 @@
+GUI:
+  compass calibration widget
+
+
+
+A few times the serial connection has locked up - seems to have been because 
+when not in sampling mode, pulse_count_start was not zeroed, so during
+sample_setup it would start running the ISR too soon and get wedged.  Seems
+like it should be able to handle that sort of thing, though maybe the buffer 
+overrun situation is not working.
+
+
+

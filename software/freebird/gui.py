@@ -22,7 +22,7 @@ class FreebirdGui(wx.App):
 
 class MainFrame(wx.Frame):
     def __init__(self,parent,title):
-        super(MainFrame,self).__init__(parent, title=title, size=(400,300))
+        super(MainFrame,self).__init__(parent, title=title, size=(600,450))
 
         self.huds={} # map port path to HUD panel instances
 
@@ -88,53 +88,87 @@ class ConnectedDeviceHUD(wx.Panel):
         self.comm=device.FreebirdComm()
         self.state='unknown'
 
-        self.grid=wx.GridBagSizer(hgap=5,vgap=5)
+        main_vbox=wx.BoxSizer(wx.VERTICAL)
         
         label=wx.StaticText(self, label="Freebird on %s"%self.port_path)
-        self.grid.Add(label,pos=(0,0),span=(1,5))
-        
+        main_vbox.Add(label)
+
+        main_vbox.Add((10,10))
+
+        butn_hbox=wx.BoxSizer(wx.HORIZONTAL)
         self.connect_btn=wx.Button(self, label="Connect")
-        self.grid.Add(self.connect_btn,pos=(1,0))
         self.Bind(wx.EVT_BUTTON,self.handle_connect,self.connect_btn)
-        
+        butn_hbox.Add(self.connect_btn)
+
         self.disconnect_btn=wx.Button(self,label="Disconnect")
-        self.grid.Add(self.disconnect_btn,pos=(1,1),span=(1,2))
         self.Bind(wx.EVT_BUTTON,self.handle_disconnect,self.disconnect_btn)
+        butn_hbox.Add(self.disconnect_btn)
 
-        self.grid.Add((1,40),pos=(2,0))
-                      
-        # Clock:
-        self.query_clock_btn=wx.Button(self,label="Query clock")
-        self.grid.Add(self.query_clock_btn,pos=(3,0))
-        self.Bind(wx.EVT_BUTTON,self.handle_query_clock,self.query_clock_btn)
-        self.sync_clock_btn=wx.Button(self,label="Sync clock")
-        self.grid.Add(self.sync_clock_btn,pos=(4,0))
-        self.Bind(wx.EVT_BUTTON,self.handle_sync_clock,self.sync_clock_btn)
-
-        self.grid.Add( wx.StaticText(self,label="Local:"),pos=(3,1))
-        self.grid.Add( wx.StaticText(self,label="Freebird:"),pos=(4,1))
+        self.stop_btn=wx.Button(self,label="Stop sampling")
+        self.Bind(wx.EVT_BUTTON,self.handle_stop,self.stop_btn)
+        self.start_btn=wx.Button(self,label="Start sampling")
+        self.Bind(wx.EVT_BUTTON,self.handle_start,self.start_btn)
+        butn_hbox.Add(self.start_btn)
+        butn_hbox.Add(self.stop_btn)
         
-        self.local_dt_display=wx.StaticText(self,label="---")
-        self.grid.Add(self.local_dt_display,pos=(3,2),span=(1,5))
-        self.device_dt_display=wx.StaticText(self,label="---")
-        self.grid.Add(self.device_dt_display,pos=(4,2),span=(1,5))
+        main_vbox.Add(butn_hbox)
 
+        main_vbox.Add((10,10))
+
+        # Clock:
+        self.add_clock_controls(main_vbox)
+        
+        main_vbox.Add((10,10))
 
         # Serial console:
-        self.serial_input=wx.TextCtrl(parent=self,size=(140,-1),style=wx.TE_PROCESS_ENTER)
-        self.grid.Add(self.serial_input,pos=(6,0),span=(1,5))
+        
+        self.serial_input=wx.TextCtrl(parent=self,size=(400,-1),style=wx.TE_PROCESS_ENTER)
+
+        main_vbox.Add(self.serial_input,flag=wx.EXPAND)
+        
         self.Bind(wx.EVT_TEXT_ENTER,self.handle_serial_input,self.serial_input)
         self.listener=self.comm.add_listener()
         self.Bind(wx.EVT_IDLE,self.poll_serial)
-        
+
         self.sercon=wx.TextCtrl(parent=self,style=wx.TE_MULTILINE|wx.TE_READONLY,
-                                pos=(10,10),size=(300,300))
-        self.sercon.AppendText('Hello')
-        self.grid.Add(self.sercon,pos=(7,0),span=(4,10))
+                                pos=(10,10),size=(400,300))
+
+        main_vbox.Add(self.sercon,flag=wx.EXPAND)
         
-        self.SetSizerAndFit(self.grid)
+        self.SetSizerAndFit(main_vbox)
 
         self.set_state('disconnected')
+
+    def add_clock_controls(self,main_vbox):
+        clock_hbox=wx.BoxSizer(wx.HORIZONTAL)
+        clock_btns=wx.BoxSizer(wx.VERTICAL)
+        clock_txts=wx.BoxSizer(wx.VERTICAL)
+        clock_hbox.Add(clock_btns)
+        clock_hbox.Add((10,10))
+        clock_hbox.Add(clock_txts)
+        main_vbox.Add(clock_hbox)
+        
+        self.query_clock_btn=wx.Button(self,label="Query clock")
+        self.Bind(wx.EVT_BUTTON,self.handle_query_clock,self.query_clock_btn)
+        clock_btns.Add(self.query_clock_btn,flag=wx.ALIGN_CENTER)
+        
+        self.sync_clock_btn=wx.Button(self,label="Sync clock")
+        self.Bind(wx.EVT_BUTTON,self.handle_sync_clock,self.sync_clock_btn)
+        clock_btns.Add(self.sync_clock_btn,flag=wx.ALIGN_CENTER)
+
+        grid=wx.GridBagSizer(vgap=5,hgap=5)
+        
+        grid.Add( wx.StaticText(self,label="Local:"),pos=(0,0))
+        grid.Add( wx.StaticText(self,label="Freebird:"),pos=(1,0))
+
+        clock_txts.Add(grid)
+        
+        self.local_dt_display=wx.StaticText(self,label="---")
+        grid.Add(self.local_dt_display,pos=(0,1))
+        
+        self.device_dt_display=wx.StaticText(self,label="---")
+        grid.Add(self.device_dt_display,pos=(1,1))
+        
 
     # Would like to show serial interactions, while also allowing pre-packaged 
     # interactions.  So any characters coming back from the comm should show
@@ -145,13 +179,32 @@ class ConnectedDeviceHUD(wx.Panel):
     #     some number
     def handle_serial_input(self,event):
         txt=self.serial_input.GetValue()
-        print "Got text:",txt
-        if state=='connected':
-            self.comm.write(txt)
+        self.serial_input.SetValue("")
+        
+        if self.state in ['command']:
+            self.comm.write(str(txt)+"\r\n")
+
+    max_console_lines=40
     def poll_serial(self,event):
         buff=self.listener.read(timeout=0)
         if len(buff):
-            self.sercon.AppendText(buff)
+            # This is backwards because AppendText has some nice
+            # auto-scrolling behavior, but it gets confused if it autoscrolls
+            # and then the buffer changes.
+
+            # truncate to max_console_lines
+            while self.sercon.GetNumberOfLines() > self.max_console_lines:
+                self.sercon.Remove(0,self.sercon.GetLineLength(0)+1)
+
+            # seems that it comes back with \r\n end of line,
+            # which skips two lines in the console.
+            self.sercon.AppendText(buff.replace("\r",""))
+
+            # unreliable:
+            # and scroll to bottom
+            # self.sercon.ShowPosition(self.sercon.GetLastPosition())
+            # self.sercon.SetScrollPos(wx.VERTICAL,0) # ,self.sercon.GetScrollRange(wx.VERTICAL))
+            
                 
     def set_state(self,state):
         """ Update GUI controls to reflect a particular state
@@ -161,11 +214,24 @@ class ConnectedDeviceHUD(wx.Panel):
             self.disconnect_btn.Disable()
             self.query_clock_btn.Disable()
             self.sync_clock_btn.Disable()
-        elif state=='connected':
+            self.serial_input.Disable()
+            self.stop_btn.Disable()
+            self.start_btn.Disable()
+        elif state in ['sampling','command']:
             self.connect_btn.Disable()
             self.disconnect_btn.Enable()
-            self.query_clock_btn.Enable()
-            self.sync_clock_btn.Enable()
+            if state=='sampling':
+                self.query_clock_btn.Disable()
+                self.sync_clock_btn.Disable()
+                self.serial_input.Enable()
+                self.stop_btn.Enable()
+                self.start_btn.Disable()
+            else:
+                self.query_clock_btn.Enable()
+                self.sync_clock_btn.Enable()
+                self.serial_input.Enable()
+                self.stop_btn.Disable()
+                self.start_btn.Enable()
         self.state=state
             
     def handle_connect(self,evt):
@@ -173,14 +239,35 @@ class ConnectedDeviceHUD(wx.Panel):
             print "WARNING: call to connect, but state is %s"%self.state
             return
         
-        if self.comm.connect(4) and self.comm.enter_command_mode():
-            self.set_state('connected')
+        if self.comm.connect(4):
+            self.set_state( self.comm.poll_state() ) # 'sampling' or 'command'
         else:
             print "WARNING: could not connect, or could not enter command mode"
             
     def handle_disconnect(self,evt):
         self.comm.disconnect()
         self.set_state('disconnected')
+
+    def handle_stop(self,evt):
+        self.comm.write("!\r\n")
+
+        for tries in range(10):
+            self.set_state(self.comm.poll_state())
+            if self.state=='command':
+                return
+            wx.Yield()
+        print "Might have failed to stop"
+        
+    def handle_start(self,evt):
+        self.comm.write("sample\r\n")
+
+        for tries in range(10):
+            self.set_state(self.comm.poll_state())
+            if self.state=='sampling':
+                return
+            wx.Yield()
+        print "Might have failed to start"
+
     def handle_query_clock(self,evt):
         if not self.comm.connected:
             print "NOT CONNECTED"
@@ -190,6 +277,7 @@ class ConnectedDeviceHUD(wx.Panel):
         fmt="%Y-%m-%d %H:%M:%S.%f"
         self.local_dt_display.SetLabel(local_dt.strftime(fmt))
         self.device_dt_display.SetLabel(fb_dt.strftime(fmt))
+        
     def handle_sync_clock(self,evt):
         if not self.comm.connected:
             print "NOT CONNECTED"

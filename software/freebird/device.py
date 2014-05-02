@@ -46,7 +46,12 @@ class TextRing(collections.deque):
                     self.cond.wait()
             # success
             return self.popleft()
-            
+
+    def clear(self):
+        """ Remove any text sitting in the ring
+        """
+        self.read(timeout=0)
+
     def read(self,n=None,timeout=None):
         """ Collect up to n characters, in up to timeout seconds,
         and return as a string.
@@ -162,10 +167,38 @@ class FreebirdComm(object):
             self.serial=None
             port.close()
 
-            
     @property
     def connected(self):
         return self.serial is not None
+
+    def poll_state(self):
+        """ not very robust way to determine the state of the logger and
+        connection.
+        this blocks, and may not deal well with a logger that's streaming
+        data.
+        """
+        if not self.connected:
+            return 'disconnected'
+        else:
+            # send a blank line, should either return prompt, or some message
+            # about sampling mode
+            self.serial_buffer.clear()
+            self.write("\r")
+
+            for lcount in range(10):
+                line=self.readline(timeout=1.0)
+                if len(line)==0:
+                    self.log.warning("Failed to get enough input for msg=%s"%msg)
+                    return 'unknown'
+                line=line.strip()
+                if line.find(self.prompt)>=0:
+                    return 'command'
+                if len(line)>0 and line[0] in ['#','$']:
+                    return 'sampling'
+                else:
+                    print "Trying poll state, got line:",line
+            print "Unsure, but assuming sampling mode"
+            return 'sampling'
             
     def open_serial_port(self,port):
         self.disconnect()
@@ -299,8 +332,6 @@ class FreebirdComm(object):
             if char in "\r\n":
                 break
         return "".join(buff)
-
-
 
     # "high-level" methods for interacting with device
     @req_cmdmode
