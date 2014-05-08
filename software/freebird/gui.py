@@ -240,7 +240,9 @@ class ConnectedDeviceHUD(wx.Panel):
             return
         
         if self.comm.connect(4):
+            print "Successfully connected"
             self.set_state( self.comm.poll_state() ) # 'sampling' or 'command'
+            print "Got a state back"
         else:
             print "WARNING: could not connect, or could not enter command mode"
             
@@ -275,8 +277,15 @@ class ConnectedDeviceHUD(wx.Panel):
         fb_dt,local_dt=self.comm.query_datetimes()
 
         fmt="%Y-%m-%d %H:%M:%S.%f"
-        self.local_dt_display.SetLabel(local_dt.strftime(fmt))
-        self.device_dt_display.SetLabel(fb_dt.strftime(fmt))
+        if fb_dt is not None:
+            self.local_dt_display.SetLabel(local_dt.strftime(fmt))
+        else:
+            self.local_dt_display.SetLabel("n/a")
+        if local_dt is not None:
+            self.device_dt_display.SetLabel(fb_dt.strftime(fmt))
+        else:
+            self.device_dt_display.SetLabel("n/a")
+            
         
     def handle_sync_clock(self,evt):
         if not self.comm.connected:

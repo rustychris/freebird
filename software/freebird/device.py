@@ -85,6 +85,8 @@ class TextRing(collections.deque):
                         timeout=t_stop-time.time()
                         if timeout>0:
                             self.cond.wait(timeout)
+                        else:
+                            break
                     if self.available():
                         buff.append(self.popleft())
                     else:
@@ -125,7 +127,12 @@ class FreebirdComm(object):
                 score+=10
             if port_path.find('HC-0')>=0:
                 # on Mac, the BT2S adapter shows up as HC-06-DevB
+                # by default.
                 score+=7
+            if port_path.find('freebird')>=0:
+                # if the BT2S has been reprogrammed, should have freebird
+                # in the name
+                score+=15
             ports.append( [port_path,port_type,port_info,score] )
         ports.sort(key=lambda elt: -elt[3])
         return ports
@@ -183,13 +190,13 @@ class FreebirdComm(object):
             # send a blank line, should either return prompt, or some message
             # about sampling mode
             self.serial_buffer.clear()
-            self.write("\r")
 
-            for lcount in range(10):
-                line=self.readline(timeout=1.0)
+            for lcount in range(5):
+                self.write("\r\n")
+                line=self.readline(timeout=5.0)
                 if len(line)==0:
-                    self.log.warning("Failed to get enough input for msg=%s"%msg)
-                    return 'unknown'
+                    print "Readline timed out - will try again"
+                    continue # try again
                 line=line.strip()
                 if line.find(self.prompt)>=0:
                     return 'command'
@@ -239,8 +246,8 @@ class FreebirdComm(object):
         """ 
         freebird_dt=None
         local_dt=None
-        
-        for line in self.interact('datetime',timeout=self.timeout):
+
+        for line in self.interact('datetime',timeout=15):
             now_dt=datetime.datetime.now()
             parts=line.split(':',1)
             if len(parts)==2 and parts[0].strip()=='datetime':
@@ -351,6 +358,11 @@ class FreebirdComm(object):
 
         if a prompt is seen, it is not returned and iteration stops
         """
+        # assumes that no input is coming down the line, but clear
+        # the buffer in case the last command left some extra stuff
+        # in there.
+        self.serial_buffer.clear()
+
         self.write(msg+"\r")
 
         while 1:
@@ -361,6 +373,7 @@ class FreebirdComm(object):
                 break
             line=line.strip()
             if line.find(self.prompt)>=0:
+                print "Found the prompt"
                 break
             else:
                 if len(line)>0:

@@ -10,4 +10,12 @@ like it should be able to handle that sort of thing, though maybe the buffer
 overrun situation is not working.
 
 
+No option to disconnect and discard a connected device panel.
+Connecting to a second port draws on top of the first.
+
+Does not deal well with a failed connection attempt, for example, if the
+freebird is wedged.  It will set state to 'unknown', but no way for this
+to be shown in the GUI.
+
+Does not deal with missing calibration files.
 
