@@ -138,10 +138,11 @@ class FreebirdFile0001(FreebirdFile):
     def read_all(self):
         with self.opened():
             self.header_text=self.open_read_header()
-            self.parse_header(self.header_text)
+            self.header_data=self.parse_header(self.header_text)
             return self.open_read_data()
 
-    def parse_header(self,header_text):
+    @classmethod
+    def parse_header(klass,header_text):
         lines=re.split(r'[\r\n]+',header_text)
         kvs=[]
         for line in lines:
@@ -153,7 +154,7 @@ class FreebirdFile0001(FreebirdFile):
                 kvs.append( (key,val) )
             else:
                 print "Skipping line:",line
-        self.header_data=dict(kvs)
+        return dict(kvs)
         
     def read_data(self):
         with self.opened():

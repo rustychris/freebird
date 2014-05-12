@@ -239,7 +239,7 @@ class ConnectedDeviceHUD(wx.Panel):
             print "WARNING: call to connect, but state is %s"%self.state
             return
         
-        if self.comm.connect(4):
+        if self.comm.connect(ports=[self.port_path]):
             print "Successfully connected"
             self.set_state( self.comm.poll_state() ) # 'sampling' or 'command'
             print "Got a state back"
