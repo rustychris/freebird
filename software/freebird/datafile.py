@@ -196,7 +196,16 @@ class FreebirdFile0001(FreebirdFile):
             # time.
             # this will upcast to int64, with plenty of room.  note that the
             # argument to datetime64 must be an integer, no floating point.
-            self.timestamps.append( np.datetime64(1000000*hdr['unixtime'] + microsecs,'us') )
+            
+            # this works in numpy 1.8, but not 1.7:
+            # dt64=np.datetime64(1000000*hdr['unixtime'] + microsecs,'us')
+
+            # in 1.7, it's pretty picky about casts, but this appears to work:
+            dt64=np.datetime64('1970-01-01 00:00:00')
+            dt64=dt64+np.timedelta64(int(hdr['unixtime']),'s')
+            dt64=dt64+np.timedelta64(microsecs,'us')
+            
+            self.timestamps.append( dt64 )
             
         basic_data = np.concatenate(self.frames)
         
