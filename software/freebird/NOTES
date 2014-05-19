@@ -19,3 +19,5 @@ to be shown in the GUI.
 
 Does not deal with missing calibration files.
 
+GUI allows choosing a serial port, but it's not used in the
+device.

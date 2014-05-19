@@ -9,6 +9,9 @@ import logging
 import datetime
 import weakref
 import threading
+import numpy as np
+
+import datafile
 
 # place holder decorators, for now just to document
 def req_connected(f):
@@ -123,6 +126,8 @@ class FreebirdComm(object):
             score=0
             if port_type=='USB Serial':
                 score+=5
+            if port_path.find('usbmodem')>=0:
+                score+=5
             if port_info.find(self.TEENSY31_USBID)>=0:
                 score+=10
             if port_path.find('HC-0')>=0:
@@ -137,10 +142,12 @@ class FreebirdComm(object):
         ports.sort(key=lambda elt: -elt[3])
         return ports
             
-    def connect(self,min_score=15):
+    def connect(self,ports=None,min_score=15):
         """ Attempt to connect. 
         timeout: stop retrying after this many seconds.  0 for one shot, -1
           to try forever
+        port: a list of paths to specific ports, otherwise, cycle through all ports
+          above min_score, in order of decreasing score.
         min_score: vague heuristic for choosing which serial ports are good candidates.
            for starters, 15 means the USB ID matches a teensy 3.1
         return True if successful.
@@ -149,11 +156,16 @@ class FreebirdComm(object):
         
         t_start=time.time()
         while 1:
-            ports = self.available_serial_ports()
+            if not ports:
+                ports_to_try = self.available_serial_ports()
+            else:
+                ports_to_try = [(p,"n/a","n/a",min_score+1) for p in ports]
 
             self.log.info('available ports: %s'%str(ports))
 
-            for port,ptype,pinfo,pscore in ports:
+            for port,ptype,pinfo,pscore in ports_to_try:
+                if pscore<=min_score:
+                    continue
                 if self.open_serial_port(port):
                     self.io_thread=threading.Thread(target=self.listen)
                     self.io_thread.daemon=True
@@ -256,6 +268,7 @@ class FreebirdComm(object):
                 local_dt=now_dt
 
         return freebird_dt,local_dt
+
     @req_cmdmode
     def sync_datetime_to_local_machine(self):
         """ Set the freebird clock to the local clock
@@ -276,6 +289,11 @@ class FreebirdComm(object):
             cmd=datetime.datetime.now().strftime('datetime=%Y-%m-%d %H:%M:%S')
             self.send(cmd)
             break
+
+    def query_serial(self):
+        info="\n".join(self.send("info"))
+        header_data=datafile.FreebirdFile0001.parse_header(info)
+        return header_data['teensy_uid']
 
     # "low-level" I/O methods - multiplex access to the serial stream
     def add_listener(self):
@@ -386,6 +404,32 @@ class FreebirdComm(object):
         for line in self.interact(cmd,timeout=timeout):
             output.append(line)
         return output
+
+    def sample_sync(self):
+        """ Enter sample mode, returning any output during
+        sample mode one line at a time, as a generator.
+        Caller is responsible for returning to command mode.
+        """
+        for line in self.interact("sample"):
+            yield line
+    def parsed_sample_sync(self):
+        """
+        Like sample_sync, but parse the data and return as numpy
+        array
+        Caller is responsible for returning to command mode.
+        """
+        info_lines=self.send("info")
+        header_data=datafile.FreebirdFile0001.parse_header("\n".join(info_lines))
+        print "Frame format: ", header_data['frame_format']
+        fmt=eval(header_data['frame_format'])
+        print "Will parse with format: ",fmt
+
+        for line in self.sample_sync():
+            line=line.strip()
+            if line[0] != '$':
+                continue
+            frame=np.fromstring(line[1:].decode('hex'),dtype=fmt)
+            yield frame
 
 ###
 
