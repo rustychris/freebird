@@ -1,8 +1,11 @@
 import numpy as np
+import os
 from matplotlib import pyplot as plt
 import device
 import threading
 import array_append
+from scipy.optimize import fmin
+import derived
 
 class CompassCalibrator(object):
     def __init__(self,dev):
@@ -108,6 +111,45 @@ class CompassCalibrator(object):
         np.savez(fn,samples=self.mxyz,
                  freebird_serial=self.freebird_serial)
 
-# Just need a better way to sense when the user is done.
-# when we have a separate figure, how to detect when it's
-# closed?
+
+
+class CalibrationFit(object):
+    """ Consumes mx,my,mz data and fits an ellipsoid
+    """
+    center=None
+    scale=None
+    def __init__(self,fn):
+        self.fn=fn
+
+        self.raw_data=np.load(fn)
+
+    def write_cal(self,cal_fn=None,overwrite=False):
+        if cal_fn is None:
+            cal_fn=self.fn.replace('.dat.npz','.cal')
+
+        if os.path.exists(cal_fn) and not overwrite:
+            print "Calibration file %s exists - will not overwrite"%cal_fn
+            return False
+
+        cal=derived.Magnetometer(serial=self.raw_data['freebird_serial'].tostring(),
+                                 offset=self.center,
+                                 scale=self.scale)
+        cal.save(cal_fn)
+            
+    def fit(self):
+        samples=self.raw_data['samples']
+        
+        def cost_center(xyz):
+            return np.var(np.sum(( samples - xyz )**2,axis=1))
+
+        self.center=fmin(cost_center,samples.mean(axis=0))
+        csamples=samples-self.center
+
+        def cost_scale(xy):
+            # overall scale doesn't matter, so really just two degrees of freedom
+            # and don't allow inverting any axis
+            xyz=np.array([abs(xy[0]),abs(xy[1]),1.0]) # 
+            return np.var(np.sum(( csamples*xyz )**2,axis=1))
+
+        s_xy=abs(fmin(cost_scale,[1,1]))
+        self.scale=np.array([s_xy[0],s_xy[1],1.0])

@@ -11,6 +11,13 @@ import glob
 from scipy.signal import butter,lfilter,lfiltic
 import numpy as np
 
+def fmt_np_array(a):
+    """ return a string representing the numpy array a, suitable for
+    writing to a file which will later be read in via execfile.
+    Assumes numpy is available as np
+    """
+    return repr(a).replace('array','np.array')
+
 class Calibration(object):
     database=[]
     short_name='generic'
@@ -36,7 +43,25 @@ class Calibration(object):
             if cal.short_name.lower()==short_name.lower() and cal.serial.lower()==serial.lower():
                 return cal
         return None
-        
+
+class Magnetometer(Calibration):
+    short_name="magnetometer"
+    def __init__(self,offset,scale,serial=None,comment=None,**kwargs):
+        self.offset=offset
+        self.scale=scale
+        self.serial=serial
+        self.comment=comment
+        self.__dict__.update(kwargs)
+        super(Magnetometer,self).__init__()
+    def save(self,fn):
+        txt="\n".join(["Magnetometer(offset=%s,"%fmt_np_array(self.offset),
+                       "             scale=%s,"%fmt_np_array(self.scale),
+                       "             serial='%s',"%self.serial,
+                       "             comment=%s)"%repr(self.comment)])
+        with open(fn,'wt') as fp:
+            fp.write(txt)
+    def adjust(self,mxyz):
+        return (mxyz-self.offset)*self.scale
         
 class Squid(Calibration):
     short_name='squid'
@@ -61,12 +86,14 @@ class Derived(object):
 
 class SquidPostprocess(Derived):
     """ Convert counts to voltage, to conductivity, to deemphasized conductivity
+    applies compass calibration if it's available.
     """
-    def __init__(self,squid_serial,sbe7probe_serial):
+    def __init__(self,squid_serial,sbe7probe_serial,freebird_serial):
         self.squid_serial=squid_serial
         self.sbe7probe_serial=sbe7probe_serial
         self.squid_cal=Calibration.find(short_name='squid',serial=squid_serial)
         self.sbe7_cal =Calibration.find(short_name='sbe7probe',serial=sbe7probe_serial)
+        self.mag_cal = Calibration.find(short_name='magnetometer',serial=freebird_serial)
     
     def postprocess(self,fbin,data,field_name=None):
         """ Given a freebird_bin object and the data array,
@@ -99,5 +126,16 @@ class SquidPostprocess(Derived):
         C,zf=lfilter(b,a,C_dC,zi=zi)
 
         # conductance * cell constant * S/m to mS/cm
-        return [('cond',C,'mS/cm'),('cond_emph',C_dC,'mS/cm')]
+        fields=[('cond',C,'mS/cm'),('cond_emph',C_dC,'mS/cm')]
+
+        if self.mag_cal is not None:
+            cal_mag = self.mag_cal.adjust(data['imu_m'])
+            fields.append( ('cal_imu_m',cal_mag,'counts') )
+
+        # Remove offset from gyro, and scale based on the MPU6050 reference Arduino
+        # code setting the gyro sensitivity to 250deg/s
+        # Full scale is [-32768,32767]
+        fields.append( ('cal_imu_g',(data['imu_g'] - data['imu_g'].mean(axis=0))*250./32768,'deg/s')
+                       
+        return fields
 

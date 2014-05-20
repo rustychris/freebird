@@ -136,6 +136,9 @@ class FreebirdFile0001(FreebirdFile):
         return "".join(header_texts)
     
     def read_all(self):
+        """ populate header text, parse that to header data,
+        process the raw data, and apply any postprocess steps necessary
+        """
         with self.opened():
             self.header_text=self.open_read_header()
             self.header_data=self.parse_header(self.header_text)
@@ -209,7 +212,12 @@ class FreebirdFile0001(FreebirdFile):
             self.timestamps.append( dt64 )
             
         basic_data = np.concatenate(self.frames)
-        
+
+        data_and_time=self.add_timestamps(basic_data)
+        self.data=self.add_derived_data(data_and_time)
+        return self.data
+
+    def add_timestamps(self,basic_data):
         expanded=[]
         dt_us=1000000/float(self.header_data['sample_rate_hz'])
         for timestamp,frame in zip(self.timestamps,self.frames):
@@ -225,18 +233,21 @@ class FreebirdFile0001(FreebirdFile):
                                                   [('timestamp',full_datetimes),
                                                    ('dn_py',full_pydnums),
                                                    ('dn_mat',full_pydnums+366)])
+        return new_data
 
-        new_data=self.add_derived_data(new_data)
-        self.data=new_data
-        return self.data
-
+    @property
+    def freebird_serial(self):
+        return header_data['teensy_uid']
+    
     def postprocessors(self):
         derived.Calibration.load_directory(os.path.dirname(self.filename))
 
         posts=[]
         if 'squid' in self.serials:
             posts.append( derived.SquidPostprocess(squid_serial=self.serials['squid'],
-                                                   sbe7probe_serial=self.serials['sbe7probe']) )
+                                                   sbe7probe_serial=self.serials['sbe7probe'],
+                                                   freebird_serial=self.freebird_serial) )
+            
         return posts
     
     def add_derived_data(self,data):
