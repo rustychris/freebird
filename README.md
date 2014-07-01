@@ -10,4 +10,7 @@ Basic design specs:
 * accurate real time clock for timestamping data
 * power draw <1.0w
 
+The Freebird was successfully deployed in the Connecticut River in May, 2014.
+Preliminary results are good, with the only issue being out-of-spec clock drift.
+
 Details are evolving, see the [freebird wiki](https://github.com/rustychris/freebird/wiki).
