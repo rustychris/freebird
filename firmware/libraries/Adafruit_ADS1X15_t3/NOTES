@@ -1,0 +1,2 @@
+RH: tweaks to access different speeds on the 1115,
+and use teensy3 I2C library.

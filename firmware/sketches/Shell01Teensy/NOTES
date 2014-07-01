@@ -1,0 +1,188 @@
+This version uses the external ADS1115 ADC, and a modified i2c_t3 library 
+for asynchronous access.
+
+
+
+Command file handling:
+
+Usage:
+
+On startup, before reading commands from the console (or maybe after
+a 10 second pause to accept a keystroke on the USB serial?)
+ - read commands from STARTUP.CMD
+
+this includes handling a sample command, which will start sampling and
+there is currently no way other than a serial key press to exit sampling.
+
+
+typically this would set the sample rate, how often to start a new file,
+and any averaging to do, then fire off sampling.  
+
+as more commands are added, STARTUP.CMD could:
+ delay until a certain time
+ choose a particular time source (whether to count square waves or use internal clock)
+ loop on other commands
+
+
+for a fallback, if there is no STARTUP.CMD, it should pause for 30 seconds then
+start sampling with default values.
+
+
+Implementation:
+  Assuming that the commands never get that verbose, the whole command
+  file could be stored in RAM.  Say the max command file size was 2k - 
+  that allows quite a bit, given that a basic scenario would be less than
+  100 bytes. 
+
+"""
+sample_interval_us=2000
+samples_per_file=1000000
+delay_until 2013-11-04 14:43:00
+sample
+"""
+
+
+what IO functions are available for files on SD?
+
+getpos,setpos (both used pointers to FatPos_t types)
+available(), tells remaining bytes which can be read.
+also should set the dateTimeCallback so that file dates are synced with logger
+  clock
+fgets, read
+seekEnd, SeekSet
+
+To avoid potential issues with having multiple files open, the command
+file cannot be left open - it should either be read in its entirety, or
+Logger should track the filename and offset, and each call to get next 
+command would re-open and seek.
+ 
+----
+
+Logging to serial?
+ - would be nice to reuse as much of the existing setup as possible.
+   compared to regular SD card logging, we don't have precise file
+   positioning.
+
+   option A2: add a call to Storage for signalling the start of a frame.
+    - on the SD card, it's already exactly filling a 512 byte block, so no obvious
+      way to mark frames.  though the overrun count could be an 8 bit value, leaving
+      an extra 8 bits.  If this were initialized to 
+
+
+Should the switch to serial logging be handled in SdFunctions, or in logger?
+ - better to have single point of control in SdFunctions.
+
+  How fast can this go?
+   Sampling ADC plus 9 dof, 20 bytes per frame, 500 frames/sec, 10kB/sec, 80kbps,
+   in theory within reach for 115200 serial connection, and the teensy is supposed
+   to be significantly higher than that.
+
+
+
+----
+
+To do:
+ Set timestamps on files
+ Restart new files every 10MB or something.
+ Write an info header in the first block of each file (or allow
+ for out-of-band information some other way)
+
+
+Time stamps:
+ Would be nice to avoid having to hit the RTC, and instead
+ just keep local count since we already get the 1024Hz pulse.
+ Only problem is that we have no date logic, so it doesn't know 
+ how many days are in each month.
+
+ (a) include a query to the RTC in the async. chain.  
+ (b) add some date arithmetic to the teensy code - basically
+     just needs to know how many.  
+ (c) use the existing date arithmetic in RTClib, and track unixtime
+     on the teensy.
+
+
+File format:
+ a full timestamp takes 6 bytes, so store one full timestamp per block, sync'd
+ to the time the first sample is written into the block.
+ Also, the overhead in truncating each block to integer number of frames is
+ about 4%, worst case.  This makes processing cleaner, and gets around the
+ pesky frame_offset code.
+
+ An initial frame or frames can hold ascii data, giving some key: value
+ pairs, including the dataformat in a python dtype string.
+
+
+Firmware freezes:
+ - without activate, and logging to serial, it's working okay
+ - logging to SD, it runs for a few seconds, then freezes.
+  "top of sample loop" is the last thing it prints.
+
+   a little bit earlier, it prints:
+     52 samples in 1002 ms (that's with sample rate at 50Hz, good)
+     0 overruns (after fixing bug in overrun check)
+     then it freezes.
+
+(a) it should have written any blocks yet, and so store.count should still be 0.
+(b) it's freezing around 150 samples.
+
+   okay - it was a bug in not resetting isrBuf_pos
+
+
+
+----
+
+Controlling power to the bluetooth module:
+
+Need some function which will be called occasionally
+with the last reading of the magnetometer.
+
+ - in sampling mode
+    - in the sample_monitor loop.
+ - in command mode
+    - maybe in the command loop, can explicitly check magnetometer.
+
+Those parts should be working okay, but now in log_to_serial, it
+fails big time.  Samples about 4 lines, and then freezes up.
+Seems to be a problem when there is too much output.  It works fine
+with just ADC data at 500Hz, or with full data at 100Hz.
+
+
+Seems to work okay when going just to USB, so the problem is the hardware
+serial.  Yep - fails as soon as bluetooth is enabled.
+
+Would be nice to move the log_to_serial output code into the Storage
+loop.  The downside is latency - 512 bytes, 504 bytes of frame data.
+For full adc+imu, 20 bytes/frame, so 25 frames/block.  At 100Hz, 
+that's a 0.25s latency.
+
+Could add some checks to use short blocks if both logging to serial
+and there are plenty of unused blocks.  This seems to work well, 
+with the exception that if the writer gets behind, it will never
+finish and we never check for serial input again.  So added
+a line to only process a finite number of blocks in each 
+Storage::loop call (equal to the total buffer space).
+
+Currently that's 30 blocks, or 15k of data.  For the test case,
+each frame is 20 bytes, each block 25 frames, so 750 frames
+of buffer. Each frame of 20 bytes is 40 bytes when written to ASCII,
+so 30k of output.  The whole thing is limited by the hardware serial,
+which is running at 115200 baud, so in theory this should respond 
+within 2 seconds when swamped.  It actually takes about 4 seconds
+to respond - up to 2 seconds to write the current limit of 30 blocks,
+then it gets the input, that signals a storage::cleanup(), and that
+again has to empty the limit of blocks.
+
+Failure mode: running out of power:
+  while logging at full rate to DATA0053.BIN, slowly lowered power
+  input...
+  output stopped around 5.5V, and current draw fell to 0.0-0.01A
+   - BAD - it's a zero byte file.
+  so now it's syncing every N blocks - this seems to work fine.
+
+
+
+
+
+
+
+

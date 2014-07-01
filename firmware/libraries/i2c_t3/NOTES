@@ -1,0 +1,53 @@
+Is it possible to asynchronously read values?
+
+done_() comes from 
+    return (i2c->currentStatus==I2C_WAITING ||
+            i2c->currentStatus==I2C_ADDR_NAK ||
+            i2c->currentStatus==I2C_DATA_NAK ||
+            i2c->currentStatus==I2C_ARB_LOST);
+presumably want to know when currentStatus <- I2C_WAITING
+ - seems to happen in i2c_isr_handler
+
+
+Any details on the I2C isr?
+
+
+One possibility is to exploit that the ADS1115 will return the most recent
+complete conversion, so if in one go we 
+  trigger a conversion
+  request the last conversion
+  start a background read
+
+then in the background we'll get the result of the previous conversion,
+ready to be read from rx buffer next time around.
+
+// trigger
+writeRegister(m_i2cAddress, ADS1015_REG_POINTER_CONFIG, config);
+// read
+readRegister(m_i2cAddress, ADS1015_REG_POINTER_CONVERT) >> m_bitShift;
+
+which expands to 
+
+// trigger
+  Wire.beginTransmission(i2cAddress);
+  i2cwrite((uint8_t)reg);
+  i2cwrite((uint8_t)(value>>8));
+  i2cwrite((uint8_t)(value & 0xFF));
+  Wire.sendTransmission(I2C_STOP); // async
+
+// read
+  Wire.beginTransmission(i2cAddress);
+  i2cwrite(ADS1015_REG_POINTER_CONVERT);
+  Wire.endTransmission();
+  Wire.sendRequestFrom(i2cAddress,2,I2C_STOP);
+
+Does the 1115 doc say how operations can be chained together?
+  Ideally we could just send all 4 bytes, and the 1115 knows that
+  that's a write, 2 bytes of data, and a read, which it will respond
+  to with 2 bytes.
+
+  it's not 100% clear that this will work, but seems like it should.
+  - well, actually the sendRequest code has to muck around with the bus - it's
+    not a simple operation.
+   
+// read from buffer at will later
