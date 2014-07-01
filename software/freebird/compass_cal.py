@@ -6,6 +6,7 @@ import threading
 import array_append
 from scipy.optimize import fmin
 import derived
+import time
 
 class CompassCalibrator(object):
     def __init__(self,dev):
@@ -67,6 +68,7 @@ class CompassCalibrator(object):
             ax.axis([-max_val,max_val,-max_val,max_val])
 
     def log_data(self):
+        time.sleep(2.0) # DBG: maybe there's some data in the pipe...
         sampler=self.dev.parsed_sample_sync()
 
         try:

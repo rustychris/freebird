@@ -2,7 +2,6 @@ import serial
 import os
 import sys
 import glob
-import serial
 import serial.tools.list_ports
 import time
 import logging
@@ -291,9 +290,14 @@ class FreebirdComm(object):
             break
 
     def query_serial(self):
-        info="\n".join(self.send("info"))
+        info="\n".join(self.send("info",timeout=10))
         header_data=datafile.FreebirdFile0001.parse_header(info)
-        return header_data['teensy_uid']
+        if 'teensy_uid' in header_data:
+            return header_data['teensy_uid']
+        else:
+            print "Failed to get teensy uid.  Available headers:"
+            print header_data
+            return "unknown"
 
     # "low-level" I/O methods - multiplex access to the serial stream
     def add_listener(self):
@@ -405,13 +409,23 @@ class FreebirdComm(object):
             output.append(line)
         return output
 
-    def sample_sync(self):
+    def sample_sync(self,keepalive=1):
         """ Enter sample mode, returning any output during
         sample mode one line at a time, as a generator.
         Caller is responsible for returning to command mode.
+
+        if keepalive is true, a newline will occasionally be sent,
+        which will trigger the freebird to avoid shutting down bluetooth.
+        These lines will be included in the output, and can be discarded
+        based on starting with '#' rather than '$'
         """
+        t=time.time()
         for line in self.interact("sample"):
             yield line
+            if time.time()-t>20:
+                self.write("\r")
+                t=time.time()
+        print "Fell out of sample_sync"
     def parsed_sample_sync(self):
         """
         Like sample_sync, but parse the data and return as numpy
@@ -424,12 +438,19 @@ class FreebirdComm(object):
         fmt=eval(header_data['frame_format'])
         print "Will parse with format: ",fmt
 
-        for line in self.sample_sync():
-            line=line.strip()
-            if line[0] != '$':
-                continue
-            frame=np.fromstring(line[1:].decode('hex'),dtype=fmt)
-            yield frame
+        try:
+            for line in self.sample_sync():
+                line=line.strip()
+                if line[0] != '$':
+                    continue
+                frame=np.fromstring(line[1:].decode('hex'),dtype=fmt)
+                yield frame
+        except Exception as exc:
+            print "While sampling, got exception,",exc
+
+    #def receive_file(self,fn):
+    #    lines=self.send("send_file=%s"%fn)
+        
 
 ###
 

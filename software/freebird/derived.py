@@ -135,7 +135,7 @@ class SquidPostprocess(Derived):
         # Remove offset from gyro, and scale based on the MPU6050 reference Arduino
         # code setting the gyro sensitivity to 250deg/s
         # Full scale is [-32768,32767]
-        fields.append( ('cal_imu_g',(data['imu_g'] - data['imu_g'].mean(axis=0))*250./32768,'deg/s')
+        fields.append( ('cal_imu_g',(data['imu_g'] - data['imu_g'].mean(axis=0))*250./32768,'deg/s') )
                        
         return fields
 

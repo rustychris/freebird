@@ -4,6 +4,7 @@ import os
 from matplotlib.dates import num2date,date2num
 import datetime
 import numpy as np
+import compass_cal
 
 ID_CONNECT=wx.NewId()
 
@@ -110,6 +111,10 @@ class ConnectedDeviceHUD(wx.Panel):
         self.Bind(wx.EVT_BUTTON,self.handle_start,self.start_btn)
         butn_hbox.Add(self.start_btn)
         butn_hbox.Add(self.stop_btn)
+
+        self.compass_btn=wx.Button(self,label="Compass cal")
+        self.Bind(wx.EVT_BUTTON,self.handle_compass_cal,self.compass_btn)
+        butn_hbox.Add(self.compass_btn)
         
         main_vbox.Add(butn_hbox)
 
@@ -217,6 +222,7 @@ class ConnectedDeviceHUD(wx.Panel):
             self.serial_input.Disable()
             self.stop_btn.Disable()
             self.start_btn.Disable()
+            self.compass_btn.Disable()
         elif state in ['sampling','command']:
             self.connect_btn.Disable()
             self.disconnect_btn.Enable()
@@ -226,12 +232,14 @@ class ConnectedDeviceHUD(wx.Panel):
                 self.serial_input.Enable()
                 self.stop_btn.Enable()
                 self.start_btn.Disable()
+                self.compass_btn.Disable()
             else:
                 self.query_clock_btn.Enable()
                 self.sync_clock_btn.Enable()
                 self.serial_input.Enable()
                 self.stop_btn.Disable()
                 self.start_btn.Enable()
+                self.compass_btn.Enable()
         self.state=state
             
     def handle_connect(self,evt):
@@ -270,6 +278,12 @@ class ConnectedDeviceHUD(wx.Panel):
             wx.Yield()
         print "Might have failed to start"
 
+    def handle_compass_cal(self,evt):
+        cal=compass_cal.CompassCalibrator(self.comm)
+        cal.run()
+        fn="compass-%s-%s.dat"%(self.comm.query_serial(),datetime.datetime.now().strftime('%Y%m%dT%H%M'))
+        cal.save(fn)
+        
     def handle_query_clock(self,evt):
         if not self.comm.connected:
             print "NOT CONNECTED"
