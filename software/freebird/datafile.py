@@ -184,6 +184,8 @@ class FreebirdFile0001(FreebirdFile):
         # and readily convertible to matlab (offset of 366, not sure which way)
         self.timestamps=[]
 
+        self.unixtimes=[] #DBG
+        self.microsecs=[] #DBG
         
         for blk_i in range(self.data_block_start,self.nblocks):
             # 0.9, because the stitching together at the end takes some time
@@ -196,6 +198,9 @@ class FreebirdFile0001(FreebirdFile):
             hdr=blk.header
             unixtime=hdr['unixtime']
             microsecs=int( float(hdr['ticks']) * 1e6 / ticks_per_second )
+            self.unixtimes.append(unixtime)#DBG
+            self.microsecs.append(microsecs)#DBG
+            
             # constructed as a UTC time, though printing often converts to local
             # time.
             # this will upcast to int64, with plenty of room.  note that the
@@ -237,16 +242,17 @@ class FreebirdFile0001(FreebirdFile):
 
     @property
     def freebird_serial(self):
-        return header_data['teensy_uid']
+        return self.header_data['teensy_uid']
     
     def postprocessors(self):
         derived.Calibration.load_directory(os.path.dirname(self.filename))
 
         posts=[]
-        if 'squid' in self.serials:
+        if ('squid' in self.serials) and ('sbe7probe' in self.serials):
             posts.append( derived.SquidPostprocess(squid_serial=self.serials['squid'],
-                                                   sbe7probe_serial=self.serials['sbe7probe'],
-                                                   freebird_serial=self.freebird_serial) )
+                                                   sbe7probe_serial=self.serials['sbe7probe']))
+                          
+        posts.append(derived.ImuPostprocess(freebird_serial=self.freebird_serial) )
             
         return posts
     
