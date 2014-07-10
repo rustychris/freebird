@@ -11,6 +11,6 @@ Basic design specs:
 * power draw <1.0w
 
 The Freebird was successfully deployed in the Connecticut River in May, 2014.
-Preliminary results are good, with the only issue being out-of-spec clock drift.
+Preliminary results are good.
 
-Details are evolving, see the [freebird wiki](https://github.com/rustychris/freebird/wiki).
+More details on the [freebird wiki](https://github.com/rustychris/freebird/wiki).
