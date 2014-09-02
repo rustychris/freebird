@@ -239,7 +239,7 @@ def BulkUpdate_proc(Quaternion,Beta,SamplePeriod,
     # Reference direction of Earth's magnetic field
     for n in range(N):
         if n%10000==0:
-            print "AHRS: %d/%d"%(n,N)
+            print "AHRS: %d/%d  %.3f%%"%(n,N, 100*float(n)/N)
             
         q = Quaternion # short name local variable for readability
         h = quat_prod(q, quat_prod(qmags[n], quat_conj(q)))

@@ -85,43 +85,47 @@ class Derived(object):
     pass
 
 
-class ImuPostprocess(Derived):
-    def __init__(self,freebird_serial):
-        """ handle normalizing the IMU fields
-        """
-        self.mag_cal = Calibration.find(short_name='magnetometer',serial=freebird_serial)
-    
-    def postprocess(self,fbin,data,field_name=None):
-        """ Given a freebird_bin object and the data array,
-        returns a list of tuples [(field_name,field_values,units),...]
-        for new fields generated from the postprocessing
-
-        field_name is either the name of a field in data, or some prefix
-        for several fields, useful when multiple instruments of the same
-        type are logged together, and are differentiated by some prefix.
-        """
-        fields=[]
-        
-        if self.mag_cal is not None:
-            cal_mag = self.mag_cal.adjust(data['imu_m'])
-            fields.append( ('cal_imu_m',cal_mag,'counts') )
-
-        # Remove offset from gyro, and scale based on the MPU6050 reference Arduino
-        # code setting the gyro sensitivity to 250deg/s
-        # Full scale is [-32768,32767]
-        fields.append( ('cal_imu_g',(data['imu_g'] - data['imu_g'].mean(axis=0))*250./32768,'deg/s') )
-                       
-        return fields
+# class ImuPostprocess(Derived):
+#     def __init__(self,freebird_serial):
+#         """ handle normalizing the IMU fields
+#         """
+#         self.mag_cal = Calibration.find(short_name='magnetometer',serial=freebird_serial)
+#     
+#     def postprocess(self,fbin,data,field_name=None):
+#         """ Given a freebird_bin object and the data array,
+#         returns a list of tuples [(field_name,field_values,units),...]
+#         for new fields generated from the postprocessing
+# 
+#         field_name is either the name of a field in data, or some prefix
+#         for several fields, useful when multiple instruments of the same
+#         type are logged together, and are differentiated by some prefix.
+#         """
+#         fields=[]
+#         
+#         if self.mag_cal is not None:
+#             cal_mag = self.mag_cal.adjust(data['imu_m'])
+#             fields.append( ('cal_imu_m',cal_mag,'counts') )
+# 
+#         # Remove offset from gyro, and scale based on the MPU6050 reference Arduino
+#         # code setting the gyro sensitivity to 250deg/s
+#         # Full scale is [-32768,32767]
+#         fields.append( ('cal_imu_g',(data['imu_g'] - data['imu_g'].mean(axis=0))*250./32768,'deg/s') )
+#                        
+#         return fields
 
 class SquidPostprocess(Derived):
     """ Convert counts to voltage, to conductivity, to deemphasized conductivity
     applies compass calibration if it's available.
     """
-    def __init__(self,squid_serial,sbe7probe_serial):
+    def __init__(self,squid_serial,sbe7probe_serial,freebird_serial=None):
         self.squid_serial=squid_serial
         self.sbe7probe_serial=sbe7probe_serial
         self.squid_cal=Calibration.find(short_name='squid',serial=squid_serial)
         self.sbe7_cal =Calibration.find(short_name='sbe7probe',serial=sbe7probe_serial)
+        if freebird_serial:
+            self.mag_cal = Calibration.find(short_name='magnetometer',serial=freebird_serial)
+        else:
+            self.mag_cal = None
     
     def postprocess(self,fbin,data,field_name=None):
         """ Given a freebird_bin object and the data array,

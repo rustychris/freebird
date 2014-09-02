@@ -11,6 +11,7 @@ from contextlib import contextmanager
 from collections import namedtuple
 import array_append
 import derived
+import netCDF4
 
 def freebird_file_factory(filename):
     """ figures out the version of the given file, and returns
@@ -193,7 +194,10 @@ class FreebirdFile0001(FreebirdFile):
             self.progress=0.9*float(blk_i)/self.nblocks
             
             blk=self.open_read_block(blk_i)
-            self.frames.append(blk.data)
+            if blk.data is not None:
+                self.frames.append(blk.data)
+            else:
+                print "Skipping a text frame, I think"
 
             hdr=blk.header
             unixtime=hdr['unixtime']
@@ -250,9 +254,12 @@ class FreebirdFile0001(FreebirdFile):
         posts=[]
         if ('squid' in self.serials) and ('sbe7probe' in self.serials):
             posts.append( derived.SquidPostprocess(squid_serial=self.serials['squid'],
-                                                   sbe7probe_serial=self.serials['sbe7probe']))
-                          
-        posts.append(derived.ImuPostprocess(freebird_serial=self.freebird_serial) )
+                                                   sbe7probe_serial=self.serials['sbe7probe'],
+                                                   freebird_serial=self.freebird_serial ))
+            
+        # this appears to be taken care of inside SquidPostProcess
+        # print "Adding ImuPostProcess"
+        # posts.append(derived.ImuPostprocess(freebird_serial=self.freebird_serial()) )
             
         return posts
     
@@ -271,3 +278,79 @@ class FreebirdFile0001(FreebirdFile):
         # from the data: 1e6/(diff(data['timestamp'].astype('i8')).mean())
         # from the settings:
         return float(self.header_data['sample_rate_hz'])
+
+
+def write_raw_nc(fb,raw_nc_fn,overwrite=True,df=None):
+    """
+    takes a dtype array as returned by read_all() above,
+    writes to a netcdf file.
+
+    if df is also supplied, will write metadata as attributes
+    in the netcdf file.
+    """
+    if os.path.exists(raw_nc_fn):
+        if overwrite:
+            os.unlink(raw_nc_fn)
+        else:
+            raise Exception("File exists!")
+
+    raw_nc=netCDF4.Dataset(raw_nc_fn,'w')
+
+    if df:
+        raw_nc.freebird_serial=df.freebird_serial
+        raw_nc.freebird_bin=df.filename
+        raw_nc.sample_rate_hz=df.sample_rate_hz()
+        raw_nc.header_text=df.header_text
+    
+    raw_nc.createDimension('time',len(fb))
+    raw_nc.createDimension('three',3)
+
+    scalar_fields=['counts','timestamp','dn_py','dn_mat','cond','cond_emph']
+    vector_fields=['imu_a','imu_g','imu_m','cal_imu_g','cal_imu_m']
+
+    for field in scalar_fields + vector_fields:
+        if field not in fb.dtype.names:
+            continue
+
+        print field
+
+        if field in vector_fields:
+            shape=('time','three')
+            if field=='cal_imu_g':
+                typ='f8'
+            else:
+                typ='i2'
+        elif field in scalar_fields:
+            shape=('time',)
+            if field in ['counts']:
+                typ='i2'
+            elif field in ['timestamp']:
+                typ='i8'
+            else:
+                typ='f8'
+
+        raw_nc.createVariable(field,typ,shape)[:] = fb[field]
+
+    raw_nc.close()
+
+
+def freebird_to_nc(bin_filename,nc_filename,serials,
+                   utc_to_local=0.0,overwrite=False):
+    """
+    Given a BIN filename to read and netcdf file to
+    parse the freebird binary filename and write
+    the almost raw datastream to netcdf for future processing.
+    
+    This will apply known calibrations using the given serial
+    numbers, and add a time shift if given.
+    """
+    if os.path.exists(nc_filename) and not overwrite:
+        raise Exception("netCDF file already exists!")
+
+    df=freebird_file_factory(bin_filename)
+    df.serials.update( serials )
+    fb=df.read_all()
+
+    fb['dn_py']+=utc_to_local 
+
+    write_raw_nc(fb,nc_filename,overwrite=overwrite,df=df)
