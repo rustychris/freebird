@@ -429,9 +429,9 @@ void formatCard() {
 // setup() removed since we're using this as a library
 
 void Storage::format(char c) {
-#ifdef DISABLE_STORE
-  return;
-#endif
+  if (status!=ENABLED)
+    return;
+
   // options for c
   //  'E' erase only
   //  'F' erase and format
@@ -518,11 +518,17 @@ void Storage::begin(void) {
   if (!sd.begin(SD_PIN_CS, SD_SPEED)) {
     // rather than halt, go into a loop repeating the message 
     // to make it easier to catch on a serial console
-    while(1) {
+    beep_code(Logger::NO_SD_CARD);
+    for(int i=0;i<20;i++) {
       sd.initErrorPrint();
       delay(500);
     }
+    status=NOCARD;
+  } else {
+    status=ENABLED;
   }
+#else
+  status=DISABLED;
 #endif
 }
 // This is called before sampling begins, setting up the buffers
@@ -549,9 +555,8 @@ void Storage::setup(void) {
   }
 
   if( ! log_to_serial ) {
-#ifndef DISABLE_STORE
-    open_next_file();
-#endif
+    if (status==ENABLED)
+      open_next_file();
   }
 
   overruns = 0;
@@ -574,10 +579,14 @@ void Storage::open_next_file(void) {
   exist, starting at data0000.bin
  */
 void Storage::set_next_active_filename(void) {
-#ifdef DISABLE_STORE
-  strcpy(active_filename,"--DISABLED--");
-  return;
-#else
+  if(status==DISABLED) {
+    strcpy(active_filename,"--DISABLED--");
+    return;
+  } else if(status==NOCARD) {
+    strcpy(active_filename,"---NOCARD---");
+    return;
+  }
+
   strcpy(active_filename,DATAFILETEMPLATE);
 
   //kludgy way of formatting strings
@@ -594,7 +603,6 @@ void Storage::set_next_active_filename(void) {
       }
     }
   }
-#endif
 }
 
 // this is called periodically to flush full buffers to SD
@@ -622,11 +630,11 @@ void Storage::loop(void) {
         mySerial.println();
       }
     } else {
-#ifndef DISABLE_STORE
-      if (!myFile.write((void*)block,sizeof(block_t))) {
-        sd.errorHalt("failed to write");
+      if ( status==ENABLED ) {
+        if (!myFile.write((void*)block,sizeof(block_t))) {
+          sd.errorHalt("failed to write");
+        }
       }
-#endif
     }
     frame_count += block->frame_count;
     // check for overrun - doesn't count them, just flags
@@ -639,12 +647,12 @@ void Storage::loop(void) {
     emptyHead = queueNext(emptyHead);
     fullTail = queueNext(fullTail);
 
-#ifndef DISABLE_STORE
-    if ( !log_to_serial && (sync_counter > sync_interval_blocks) ) {
-      myFile.sync();
-      sync_counter=0;
+    if ( status==ENABLED ) {
+      if ( !log_to_serial && (sync_counter > sync_interval_blocks) ) {
+        myFile.sync();
+        sync_counter=0;
+      }
     }
-#endif
   }
 }
 
@@ -656,10 +664,10 @@ void Storage::cleanup(void) {
     close_block();
   }
   loop(); // write any straggling data
-#ifndef DISABLE_STORE
-  if ( !log_to_serial )
-    myFile.close();
-#endif
+  if ( status==ENABLED ) {
+    if ( !log_to_serial )
+      myFile.close();
+  }
 }
 
 
@@ -787,4 +795,20 @@ uint8_t Storage::send_data(const char *filename,uint32_t start,uint32_t bytes) {
   
   myFile.close();
   return 0;
+}
+
+void Storage::info(Print &out) 
+{
+  out.print("storage_status: ");
+  out.println(status);
+  out.print("storage_status_name: ");
+  if (status==DISABLED) {
+    out.println("DISABLED");
+  } else if (status==NOCARD) {
+    out.println("NOCARD");
+  } else if (status==ENABLED) {
+    out.println("ENABLED");
+  }
+  out.print("log_to_serial: ");
+  out.println(log_to_serial);
 }

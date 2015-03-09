@@ -11,8 +11,13 @@
 #include <SdFat.h>
 extern SdFat sd;
 
+
+
 class Storage : public Print {
 public:
+  enum SdStatus {DISABLED,NOCARD,ENABLED};
+  SdStatus status;
+
   uint16_t frame_bytes;
   Storage(void) { log_to_serial=false; frame_bytes=2; sync_interval_blocks=30; }
 
@@ -28,6 +33,8 @@ public:
   void setup(void);
   void loop(void);
   void cleanup(void);
+
+  void info(Print &);
 
   void store_frame(uint8_t *frame);
   void open_block(uint8_t flags);
