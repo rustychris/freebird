@@ -515,7 +515,14 @@ void Storage::begin(void) {
   // this is called once on boot up
 #ifndef DISABLE_STORE
   // And initialize the SD interface and open a file
-  if (!sd.begin(SD_PIN_CS, SD_SPEED)) sd.initErrorHalt();
+  if (!sd.begin(SD_PIN_CS, SD_SPEED)) {
+    // rather than halt, go into a loop repeating the message 
+    // to make it easier to catch on a serial console
+    while(1) {
+      sd.initErrorPrint();
+      delay(500);
+    }
+  }
 #endif
 }
 // This is called before sampling begins, setting up the buffers
