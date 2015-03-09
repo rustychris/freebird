@@ -219,8 +219,8 @@ def BulkUpdate_proc(Quaternion,Beta,SamplePeriod,
                     Gyroscope,Accelerometer,Magnetometer):
     """ 
     """
-    Accelerometer=normalize(Accelerometer)
-    Magnetometer=normalize(Magnetometer)
+    Accelerometer=normalize(Accelerometer.astype('f8'))
+    Magnetometer=normalize(Magnetometer.astype('f8'))
     
     N=len(Accelerometer)
     quats=np.zeros( (N,4), 'f8')
