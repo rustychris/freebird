@@ -192,9 +192,17 @@ public:
   uint32_t mean_accum;
   double var_accum;
   uint16_t min_reading,max_reading;
+
+  // beep codes
+  enum ErrorCode {
+    NO_SD_CARD = 3
+  };
 };
 
 extern Logger logger;
+
+void beep_code(Logger::ErrorCode);
+
 
 
 #endif

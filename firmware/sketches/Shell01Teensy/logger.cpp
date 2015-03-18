@@ -453,13 +453,13 @@ void Logger::store_sample(uint16_t sample) {
 void Logger::sample_setup(void) {
   mySerial.println("Changing to sample mode");
 
-  tone(20,1500);
+  tone(PIEZO_PIN,1500);
   delay(100);
-  noTone(20);
+  noTone(PIEZO_PIN);
   delay(50);
-  tone(20,1000);
+  tone(PIEZO_PIN,1000);
   delay(100);
-  noTone(20);
+  noTone(PIEZO_PIN);
 
 #ifdef MPU9150_MAG_ENABLE
   mpu9150_mag_trigger();
@@ -873,8 +873,7 @@ void Logger::system_info(Print &out) {
 
   frame_info(out);
 
-  out.print("log_to_serial: ");
-  out.println(store.log_to_serial);
+  store.info(out);
 
 #ifdef MPU9150_MAG_ENABLE
   out.print("log_imu: ");
@@ -1176,3 +1175,15 @@ void Logger::send_file(char *cmd_arg){
   // }
   store.send_data(cmd_arg);
 }
+
+void beep_code(Logger::ErrorCode c) {
+  delay(1000); 
+
+  for(int i=0;i<c;i++) {
+    tone(PIEZO_PIN,1200);
+    delay(400);
+    noTone(PIEZO_PIN);
+    delay(100);
+  }
+}
+
