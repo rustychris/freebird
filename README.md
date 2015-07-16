@@ -16,4 +16,4 @@ the Connecticut.  Full analyses of the data are still underway, but the
 dissipation values and structure of overturns appear reasonable and consistent
 with other measurements in the same environments.
 
-More details on the [freebird wiki](https://github.com/rustychris/freebird/wiki).
+More complete documentation is on the [Freebird Wiki](https://github.com/rustychris/freebird/wiki).
