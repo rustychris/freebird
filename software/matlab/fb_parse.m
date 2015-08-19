@@ -120,7 +120,10 @@ end
 end
 
 function [fb]=parse_header_text(fb)
-  lines=strsplit(fb.config_txt,'\n');
+  % strsplit only in newer matlab
+  % lines=strsplit(fb.config_txt,'\n');
+  % use regexp instead:
+  lines=regexp(fb.config_txt,'\n','split');
   fb.config=[];
   for line=lines
       trimmed=strtrim(line{1});
@@ -166,7 +169,9 @@ function [fb]=frames_to_fields(fb)
     name=fld_def{1};
     fmt=fld_def{2}; % ala '<i2' or '<i2',3
     
-    parts=strsplit(fmt,',');
+    % use regexp for backwards compatibility before R2013a
+    %parts=strsplit(fmt,',');
+    parts=regexp(fmt,',','split');
     
     item=parts{1};
     item=item(2:end-1);
